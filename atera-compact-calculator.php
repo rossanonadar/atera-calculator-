@@ -12,7 +12,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-
 /**
  * Safely resolve an asset version based on modification time.
  */
@@ -24,6 +23,45 @@ function atera_compact_calculator_asset_version( $relative_path ) {
     }
 
     return '1.0.0';
+}
+
+/**
+ * Load the calculator configuration from the bundled JSON file.
+ *
+ * @return array|WP_Error
+ */
+function atera_compact_calculator_load_config() {
+    $config_path = plugin_dir_path( __FILE__ ) . 'calc-sliders.json';
+
+    if ( ! file_exists( $config_path ) ) {
+        return new WP_Error(
+            'atera_calculator_missing_config',
+            __( 'The calculator configuration could not be found.', 'atera' ),
+            array( 'status' => 500 )
+        );
+    }
+
+    if ( ! is_readable( $config_path ) ) {
+        return new WP_Error(
+            'atera_calculator_unreadable_config',
+            __( 'The calculator configuration file is not readable.', 'atera' ),
+            array( 'status' => 500 )
+        );
+    }
+
+    $data = function_exists( 'wp_json_file_decode' )
+        ? wp_json_file_decode( $config_path, array( 'associative' => true ) )
+        : json_decode( file_get_contents( $config_path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+
+    if ( null === $data || ! is_array( $data ) ) {
+        return new WP_Error(
+            'atera_calculator_invalid_config',
+            __( 'The calculator configuration is invalid.', 'atera' ),
+            array( 'status' => 500 )
+        );
+    }
+
+    return $data;
 }
 
 function atera_compact_calculator_register_block() {
@@ -62,10 +100,11 @@ function atera_compact_calculator_register_block() {
     register_block_type(
         'atera/compact-calculator',
         array(
-            'editor_script' => 'atera-compact-calculator-block',
-            'script'        => 'atera-compact-calculator-frontend',
-            'style'         => 'atera-compact-calculator-style',
-            'editor_style'  => 'atera-compact-calculator-editor-style',
+            'editor_script'   => 'atera-compact-calculator-block',
+            'script'          => 'atera-compact-calculator-frontend',
+            'style'           => 'atera-compact-calculator-style',
+            'editor_style'    => 'atera-compact-calculator-editor-style',
+            'render_callback' => 'atera_compact_calculator_render_block',
         )
     );
 }
@@ -88,38 +127,59 @@ function atera_compact_calculator_register_rest_routes() {
 add_action( 'rest_api_init', 'atera_compact_calculator_register_rest_routes' );
 
 /**
- * Provide the slider configuration from the bundled JSON file.
+ * Provide the slider configuration from the bundled JSON file via REST.
  */
 function atera_compact_calculator_get_slider_config( WP_REST_Request $request ) {
-    $config_path = plugin_dir_path( __FILE__ ) . 'calc-sliders.json';
+    $config = atera_compact_calculator_load_config();
 
-    if ( ! file_exists( $config_path ) ) {
-        return new WP_Error(
-            'atera_calculator_missing_config',
-            __( 'The calculator configuration could not be found.', 'atera' ),
-            array( 'status' => 500 )
-        );
+    if ( is_wp_error( $config ) ) {
+        return $config;
     }
 
-    if ( ! is_readable( $config_path ) ) {
-        return new WP_Error(
-            'atera_calculator_unreadable_config',
-            __( 'The calculator configuration file is not readable.', 'atera' ),
-            array( 'status' => 500 )
-        );
-    }
+    return rest_ensure_response( $config );
+}
 
-    $data = function_exists( 'wp_json_file_decode' )
-        ? wp_json_file_decode( $config_path, array( 'associative' => true ) )
-        : json_decode( file_get_contents( $config_path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+/**
+ * Render callback for the block on the front end.
+ */
+function atera_compact_calculator_render_block( $attributes ) {
+    $title = isset( $attributes['title'] ) ? $attributes['title'] : __( 'Calculate how much you save with <br>Atera', 'atera' );
 
-    if ( null === $data ) {
-        return new WP_Error(
-            'atera_calculator_invalid_config',
-            __( 'The calculator configuration is invalid.', 'atera' ),
-            array( 'status' => 500 )
-        );
-    }
+    ob_start();
+    ?>
+    <div class="atera-compact-calculator" data-config-endpoint="/atera/v1/calculator-config">
+        <div class="atera-compact-calculator__layout">
+            <div class="atera-compact-calculator__column atera-compact-calculator__column--intro">
+                <h2 class="atera-compact-calculator__title"><?php echo wp_kses_post( $title ); ?></h2>
+            </div>
+            <div class="atera-compact-calculator__column atera-compact-calculator__column--panel">
+                <div class="atera-compact-calculator__panel" data-calculator-panel>
+                    <p class="atera-compact-calculator__loading"><?php esc_html_e( 'Loading calculator…', 'atera' ); ?></p>
+                </div>
+            </div>
+            <div class="atera-compact-calculator__column atera-compact-calculator__column--summary">
+                <div class="atera-compact-calculator__summary-card">
+                    <div class="atera-compact-calculator__summary-kicker"><?php esc_html_e( 'You save', 'atera' ); ?></div>
+                    <div class="atera-compact-calculator__summary-total" data-display-savings>$0</div>
+                    <p class="atera-compact-calculator__summary-subtext"><?php esc_html_e( 'annually — estimated based on Atera’s Pro Plan', 'atera' ); ?></p>
+                    <a href="#start-trial" class="atera-compact-calculator__summary-cta"><?php esc_html_e( 'Start free trial', 'atera' ); ?></a>
+                    <div class="atera-compact-calculator__summary-breakdown">
+                        <div class="atera-compact-calculator__summary-breakdown-header"><?php esc_html_e( 'Average annual cost', 'atera' ); ?></div>
+                        <div class="atera-compact-calculator__summary-breakdown-row">
+                            <span><?php esc_html_e( 'Atera', 'atera' ); ?></span>
+                            <span data-display-atera-cost>$0</span>
+                        </div>
+                        <div class="atera-compact-calculator__summary-breakdown-row">
+                            <span><?php esc_html_e( 'Current provider', 'atera' ); ?></span>
+                            <span data-display-current-cost>$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <p class="atera-compact-calculator__note"><?php esc_html_e( 'Prices are shown in US Dollars', 'atera' ); ?></p>
+    </div>
+    <?php
 
-    return rest_ensure_response( $data );
+    return ob_get_clean();
 }

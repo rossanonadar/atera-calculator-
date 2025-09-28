@@ -1,97 +1,40 @@
 (function (wp) {
     const { __ } = wp.i18n;
     const { registerBlockType } = wp.blocks;
-    const { useState, useMemo, useEffect, Fragment } = wp.element;
+    const { useState, useEffect, useMemo, Fragment } = wp.element;
     const { useBlockProps, RichText, InspectorControls } = wp.blockEditor;
-    const { PanelBody, TextControl, Notice } = wp.components;
+    const { PanelBody, TextControl, Notice, Spinner } = wp.components;
     const apiFetch = wp.apiFetch;
-
-    const FALLBACK_CONFIG = {
-        sliders: [
-            {
-                id: 'technicians',
-                label: __('How many technicians are in your company?', 'atera'),
-                min: 0,
-                max: 20,
-                step: 1,
-                default: 10,
-                marks: [0, 5, 10, 15, 20],
-                format: { type: 'number' },
-            },
-            {
-                id: 'endpoints',
-                label: __('How many endpoints do you manage?', 'atera'),
-                min: 0,
-                max: 2500,
-                step: 100,
-                default: 1200,
-                marks: [0, 500, 1000, 1500, 2000, 2500],
-                format: { type: 'number', thousands: true },
-            },
-            {
-                id: 'endpointRate',
-                label: __('How much are you charged per endpoint per month?', 'atera'),
-                min: 1,
-                max: 20,
-                step: 1,
-                default: 7,
-                marks: [1, 3, 5, 7, 20],
-                format: { type: 'currency', currency: 'USD' },
-            },
-        ],
-    };
 
     const ATERA_SEAT_RATE = 149;
 
     const normaliseSlider = (slider) => {
-        if (!slider || typeof slider !== 'object') {
+        if (!slider || typeof slider !== 'object' || !slider.id) {
             return null;
         }
 
-        const base = {
+        const min = Number(slider.min) || 0;
+        const max = Number(slider.max) || 0;
+        const step = Number(slider.step) || 1;
+        const defaultValue = slider.default !== undefined ? Number(slider.default) : min;
+
+        return {
             id: slider.id,
-            label: slider.label,
-            min: Number(slider.min) || 0,
-            max: Number(slider.max) || 0,
-            step: Number(slider.step) || 1,
-            default: slider.default !== undefined ? Number(slider.default) : Number(slider.min) || 0,
+            label: slider.label || slider.id,
+            min,
+            max,
+            step,
+            default: defaultValue,
             marks: Array.isArray(slider.marks) ? slider.marks : [],
             format: slider.format || { type: 'number' },
         };
-
-        if (!base.id) {
-            return null;
-        }
-
-        if (base.marks.length === 0) {
-            base.marks = [base.min, base.max];
-        }
-
-        return base;
     };
 
-    const resolveConfig = (payload) => {
-        if (!payload || !Array.isArray(payload.sliders)) {
-            return FALLBACK_CONFIG;
+    const formatMarkValue = (slider, mark) => {
+        if (typeof mark !== 'number') {
+            return mark;
         }
 
-        const sliders = payload.sliders
-            .map(normaliseSlider)
-            .filter(Boolean);
-
-        return sliders.length ? { sliders } : FALLBACK_CONFIG;
-    };
-
-    const getDefaultsFromConfig = (config) => {
-        const defaults = {};
-        config.sliders.forEach((slider) => {
-            defaults[slider.id] = slider.default;
-        });
-        return defaults;
-    };
-
-    const formatSliderValue = (slider, rawValue) => {
-        const value = Number(rawValue) || 0;
         const format = slider.format || { type: 'number' };
 
         if (format.type === 'currency') {
@@ -99,18 +42,18 @@
                 return new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: format.currency || 'USD',
-                    maximumFractionDigits: 0,
-                }).format(value);
+                    maximumFractionDigits: format.maximumFractionDigits ?? 0,
+                }).format(mark);
             } catch (error) {
-                return `$${value.toLocaleString()}`;
+                return `$${mark.toLocaleString()}`;
             }
         }
 
         if (format.thousands) {
-            return value.toLocaleString();
+            return mark.toLocaleString();
         }
 
-        return value;
+        return mark;
     };
 
     const calculateFigures = (values) => {
@@ -129,18 +72,21 @@
         };
     };
 
-    const renderScale = (slider) =>
-        wp.element.createElement(
-            'div',
-            { className: 'atera-compact-calculator__scale', 'aria-hidden': 'true' },
-            (Array.isArray(slider.marks) ? slider.marks : []).map((mark, index) =>
-                wp.element.createElement(
-                    'span',
-                    { key: `${slider.id}-mark-${index}` },
-                    typeof mark === 'number' ? formatSliderValue(slider, mark) : mark
-                )
-            )
-        );
+    const getRangeGradient = (slider, rawValue) => {
+        if (!slider) {
+            return undefined;
+        }
+
+        const range = slider.max - slider.min;
+        const numericValue = Number(rawValue);
+        const clamped = Number.isFinite(numericValue)
+            ? Math.min(Math.max(numericValue, slider.min), slider.max)
+            : slider.min;
+        const progress = range > 0 ? ((clamped - slider.min) / range) * 100 : 0;
+        const safeProgress = Math.max(0, Math.min(100, progress));
+
+        return `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
+    };
 
     registerBlockType('atera/compact-calculator', {
         apiVersion: 2,
@@ -156,64 +102,73 @@
                 type: 'string',
                 source: 'html',
                 selector: '.atera-compact-calculator__title',
-                default: __('Calculate how much you save with Atera', 'atera'),
+                default: __('Calculate how much you save with <br>Atera', 'atera'),
             },
         },
         edit: (props) => {
             const { attributes, setAttributes } = props;
-            const [config, setConfig] = useState(FALLBACK_CONFIG);
-            const [controls, setControls] = useState(getDefaultsFromConfig(FALLBACK_CONFIG));
-            const [loadingConfig, setLoadingConfig] = useState(true);
-            const [configError, setConfigError] = useState(null);
+            const [config, setConfig] = useState(null);
+            const [controls, setControls] = useState({});
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
 
             useEffect(() => {
-                let isMounted = true;
+                let mounted = true;
 
                 if (!apiFetch) {
-                    setLoadingConfig(false);
+                    setLoading(false);
+                    setError(__('API utilities unavailable.', 'atera'));
                     return () => {};
                 }
 
                 apiFetch({ path: '/atera/v1/calculator-config' })
                     .then((response) => {
-                        if (!isMounted) {
+                        if (!mounted) {
                             return;
                         }
-                        const resolved = resolveConfig(response);
-                        setConfig(resolved);
-                        setControls(getDefaultsFromConfig(resolved));
-                        setConfigError(null);
+
+                        const sliders = (response?.sliders || [])
+                            .map(normaliseSlider)
+                            .filter(Boolean);
+
+                        if (!sliders.length) {
+                            throw new Error('invalid-config');
+                        }
+
+                        const nextConfig = { sliders };
+                        const defaults = {};
+                        sliders.forEach((slider) => {
+                            defaults[slider.id] = slider.default;
+                        });
+
+                        setConfig(nextConfig);
+                        setControls(defaults);
+                        setError(null);
                     })
                     .catch(() => {
-                        if (!isMounted) {
+                        if (!mounted) {
                             return;
                         }
-                        setConfigError(__('Unable to load calculator settings. Using defaults.', 'atera'));
+                        setConfig(null);
+                        setControls({});
+                        setError(__('Unable to load calculator settings from the REST endpoint.', 'atera'));
                     })
                     .finally(() => {
-                        if (!isMounted) {
+                        if (!mounted) {
                             return;
                         }
-                        setLoadingConfig(false);
+                        setLoading(false);
                     });
 
                 return () => {
-                    isMounted = false;
+                    mounted = false;
                 };
             }, []);
-
-            const sliderMap = useMemo(() => {
-                const map = {};
-                config.sliders.forEach((slider) => {
-                    map[slider.id] = slider;
-                });
-                return map;
-            }, [config]);
 
             const figures = useMemo(() => calculateFigures(controls), [controls]);
 
             const handleSliderChange = (id) => (event) => {
-                const value = event && event.target ? event.target.value : event;
+                const value = event?.target?.value ?? event;
                 setControls((prev) => ({
                     ...prev,
                     [id]: value,
@@ -222,200 +177,101 @@
 
             const blockProps = useBlockProps({ className: 'atera-compact-calculator' });
 
-            return (
-                wp.element.createElement(
-                    Fragment,
-                    null,
-                    wp.element.createElement(
-                        InspectorControls,
-                        null,
-                        wp.element.createElement(
-                            PanelBody,
-                            {
-                                title: __('Display', 'atera'),
-                                initialOpen: true,
-                            },
-                            wp.element.createElement(TextControl, {
-                                label: __('Title', 'atera'),
-                                value: attributes.title,
-                                onChange: (value) => setAttributes({ title: value }),
-                            }),
-                            configError &&
-                                wp.element.createElement(Notice, {
-                                    status: 'warning',
-                                    isDismissible: false,
-                                }, configError)
-                        )
-                    ),
-                    wp.element.createElement(
+            const renderSliders = () => {
+                if (!config) {
+                    return null;
+                }
+
+                return config.sliders.map((slider) => {
+                    const value = controls[slider.id] ?? slider.default;
+
+                    return wp.element.createElement(
                         'div',
-                        blockProps,
+                        {
+                            key: slider.id,
+                            className: 'atera-compact-calculator__slider-field',
+                            'data-slider': slider.id,
+                        },
                         wp.element.createElement(
                             'div',
-                            { className: 'atera-compact-calculator__layout' },
+                            { className: 'atera-compact-calculator__slider-heading' },
                             wp.element.createElement(
-                                'div',
-                                { className: 'atera-compact-calculator__column atera-compact-calculator__column--intro' },
-                                wp.element.createElement(RichText, {
-                                    tagName: 'h2',
-                                    className: 'atera-compact-calculator__title',
-                                    value: attributes.title,
-                                    onChange: (value) => setAttributes({ title: value }),
-                                    placeholder: __('Add block title…', 'atera'),
-                                })
-                            ),
-                            wp.element.createElement(
-                                'div',
-                                { className: 'atera-compact-calculator__column atera-compact-calculator__column--panel' },
+                                'span',
+                                { className: 'atera-compact-calculator__slider-label' },
+                                slider.label
+                            )
+                        ),
+                        wp.element.createElement('input', {
+                            type: 'range',
+                            className: 'atera-compact-calculator__range',
+                            min: slider.min,
+                            max: slider.max,
+                            step: slider.step,
+                            value,
+                            style: { background: getRangeGradient(slider, value) },
+                            onChange: handleSliderChange(slider.id),
+                            onInput: handleSliderChange(slider.id),
+                            'data-input-id': slider.id,
+                        }),
+                        wp.element.createElement(
+                            'div',
+                            { className: 'atera-compact-calculator__scale' },
+                            (slider.marks || []).map((mark, index) =>
                                 wp.element.createElement(
-                                    'div',
-                                    { className: 'atera-compact-calculator__panel' },
-                                    wp.element.createElement(
-                                        'h3',
-                                        { className: 'atera-compact-calculator__panel-heading' },
-                                        __('Adjust the scales below to see your savings', 'atera')
-                                    ),
-                                    loadingConfig &&
-                                        wp.element.createElement(
-                                            'p',
-                                            { className: 'atera-compact-calculator__loading' },
-                                            __('Loading slider settings…', 'atera')
-                                        ),
-                                    config.sliders.map((slider) => {
-                                        const currentValue = controls[slider.id];
-
-                                        return wp.element.createElement(
-                                            'div',
-                                            {
-                                               key: slider.id,
-                                                className: 'atera-compact-calculator__slider-field',
-                                                'data-slider': slider.id,
-                                           },
-                                            wp.element.createElement(
-                                                'div',
-                                                { className: 'atera-compact-calculator__slider-heading' },
-                                                wp.element.createElement(
-                                                    'span',
-                                                    { className: 'atera-compact-calculator__slider-label' },
-                                                    slider.label
-                                                )
-                                            ),
-                                            wp.element.createElement('input', {
-                                                type: 'range',
-                                                className: 'atera-compact-calculator__range',
-                                                min: slider.min,
-                                                max: slider.max,
-                                                step: slider.step,
-                                                value: currentValue,
-                                                onChange: handleSliderChange(slider.id),
-                                            }),
-                                            renderScale(slider)
-                                        );
-                                    })
-                                )
-                            ),
-                            wp.element.createElement(
-                                'div',
-                                { className: 'atera-compact-calculator__column atera-compact-calculator__column--summary' },
-                                wp.element.createElement(
-                                    'div',
-                                    { className: 'atera-compact-calculator__summary-card' },
-                                    wp.element.createElement(
-                                        'div',
-                                        { className: 'atera-compact-calculator__summary-kicker' },
-                                        __('You save', 'atera')
-                                    ),
-                                    wp.element.createElement(
-                                        'div',
-                                        { className: 'atera-compact-calculator__summary-total' },
-                                        new Intl.NumberFormat('en-US', {
-                                            style: 'currency',
-                                            currency: 'USD',
-                                            maximumFractionDigits: 0,
-                                        }).format(figures.savings)
-                                    ),
-                                    wp.element.createElement(
-                                        'p',
-                                        { className: 'atera-compact-calculator__summary-subtext' },
-                                        __('annually — estimated based on Atera’s Pro Plan', 'atera')
-                                    ),
-                                    wp.element.createElement(
-                                        'input',
-                                        {
-                                            className: 'atera-compact-calculator__input',
-                                            type: 'text',
-                                            placeholder: __('Enter your work email', 'atera'),
-                                            'aria-label': __('Enter your work email', 'atera'),
-                                        },
-                                        null // input can't have children
-                                    ),
-                                    wp.element.createElement(
-                                        'div',
-                                        { className: 'atera-compact-calculator__summary-cta' },
-                                        __('Start free trial', 'atera')
-                                    ),
-                                     wp.element.createElement(
-                                        'p',
-                                        { className: 'atera-compact-calculator__cerdit' },
-                                        __('No credit card required', 'atera')
-                                    ),
-                                    wp.element.createElement(
-                                        'div',
-                                        { className: 'atera-compact-calculator__summary-breakdown' },
-                                        wp.element.createElement(
-                                            'div',
-                                            { className: 'atera-compact-calculator__summary-breakdown-header' },
-                                            __('Average annual cost', 'atera')
-                                        ),
-                                        wp.element.createElement(
-                                            'div',
-                                            { className: 'atera-compact-calculator__summary-breakdown-row' },
-                                            wp.element.createElement('span', null, __('Atera', 'atera')),
-                                            wp.element.createElement(
-                                                'span',
-                                                null,
-                                                new Intl.NumberFormat('en-US', {
-                                                    style: 'currency',
-                                                    currency: 'USD',
-                                                    maximumFractionDigits: 0,
-                                                }).format(figures.ateraAnnual)
-                                            )
-                                        ),
-                                        wp.element.createElement(
-                                            'div',
-                                            { className: 'atera-compact-calculator__summary-breakdown-row' },
-                                            wp.element.createElement('span', null, __('Current provider', 'atera')),
-                                            wp.element.createElement(
-                                                'span',
-                                                null,
-                                                new Intl.NumberFormat('en-US', {
-                                                    style: 'currency',
-                                                    currency: 'USD',
-                                                    maximumFractionDigits: 0,
-                                                }).format(figures.currentAnnual)
-                                            )
-                                        )
-                                    ),
+                                    'span',
+                                    { key: `${slider.id}-mark-${index}` },
+                                    formatMarkValue(slider, mark)
                                 )
                             )
                         )
-                    ),
-                      wp.element.createElement(
-                        'p',
-                        { className: 'atera-compact-calculator__summary-note' },
-                        __('Prices are shown in US Dollars', 'atera')
-                    )
-                )
-            );
-        },
-        save: (props) => {
-            const { attributes } = props;
-            const blockProps = useBlockProps.save({
-                className: 'atera-compact-calculator',
-                'data-config-endpoint': '/atera/v1/calculator-config',
-            });
+                    );
+                });
+            };
 
-            return (
+            const panelChildren = () => {
+                if (loading) {
+                    return wp.element.createElement(
+                        'p',
+                        { className: 'atera-compact-calculator__loading' },
+                        wp.element.createElement(Spinner, null),
+                        ' ',
+                        __('Loading slider settings…', 'atera')
+                    );
+                }
+
+                if (error) {
+                    return wp.element.createElement(
+                        Notice,
+                        {
+                            status: 'error',
+                            isDismissible: false,
+                        },
+                        error
+                    );
+                }
+
+                return renderSliders();
+            };
+
+            return wp.element.createElement(
+                Fragment,
+                null,
+                wp.element.createElement(
+                    InspectorControls,
+                    null,
+                    wp.element.createElement(
+                        PanelBody,
+                        {
+                            title: __('Display', 'atera'),
+                            initialOpen: true,
+                        },
+                        wp.element.createElement(TextControl, {
+                            label: __('Title', 'atera'),
+                            value: attributes.title,
+                            onChange: (value) => setAttributes({ title: value }),
+                        })
+                    )
+                ),
                 wp.element.createElement(
                     'div',
                     blockProps,
@@ -425,10 +281,12 @@
                         wp.element.createElement(
                             'div',
                             { className: 'atera-compact-calculator__column atera-compact-calculator__column--intro' },
-                            wp.element.createElement(RichText.Content, {
+                            wp.element.createElement(RichText, {
                                 tagName: 'h2',
                                 className: 'atera-compact-calculator__title',
                                 value: attributes.title,
+                                onChange: (value) => setAttributes({ title: value }),
+                                placeholder: __('Add block title…', 'atera'),
                             })
                         ),
                         wp.element.createElement(
@@ -442,35 +300,7 @@
                                     { className: 'atera-compact-calculator__panel-heading' },
                                     __('Adjust the scales below to see your savings', 'atera')
                                 ),
-                                FALLBACK_CONFIG.sliders.map((slider) =>
-                                    wp.element.createElement(
-                                        'div',
-                                        {
-                                            className: 'atera-compact-calculator__slider-field',
-                                            key: slider.id,
-                                            'data-slider': slider.id,
-                                        },
-                                        wp.element.createElement(
-                                            'div',
-                                            { className: 'atera-compact-calculator__slider-heading' },
-                                            wp.element.createElement(
-                                                'span',
-                                                { className: 'atera-compact-calculator__slider-label' },
-                                                slider.label
-                                            )
-                                        ),
-                                        wp.element.createElement('input', {
-                                            type: 'range',
-                                            className: 'atera-compact-calculator__range',
-                                            min: slider.min,
-                                            max: slider.max,
-                                            step: slider.step,
-                                            value: slider.default,
-                                            [`data-input-${slider.id}`]: true,
-                                        }),
-                                        renderScale(slider)
-                                    )
-                                )
+                                panelChildren()
                             )
                         ),
                         wp.element.createElement(
@@ -486,39 +316,22 @@
                                 ),
                                 wp.element.createElement(
                                     'div',
-                                    {
-                                        className: 'atera-compact-calculator__summary-total',
-                                        'data-display-savings': true,
-                                    },
-                                    '$0'
+                                    { className: 'atera-compact-calculator__summary-total' },
+                                    new Intl.NumberFormat('en-US', {
+                                        style: 'currency',
+                                        currency: 'USD',
+                                        maximumFractionDigits: 0,
+                                    }).format(figures.savings)
                                 ),
                                 wp.element.createElement(
                                     'p',
                                     { className: 'atera-compact-calculator__summary-subtext' },
                                     __('annually — estimated based on Atera’s Pro Plan', 'atera')
                                 ),
-                                 wp.element.createElement(
-                                        'input',
-                                        {
-                                            className: 'atera-compact-calculator__input',
-                                            type: 'text',
-                                            placeholder: __('Enter your work email', 'atera'),
-                                            'aria-label': __('Enter your work email', 'atera'),
-                                        },
-                                        null // input can't have children
-                                    ),
                                 wp.element.createElement(
-                                    'a',
-                                    {
-                                        href: '#start-trial',
-                                        className: 'atera-compact-calculator__summary-cta',
-                                    },
+                                    'div',
+                                    { className: 'atera-compact-calculator__summary-cta' },
                                     __('Start free trial', 'atera')
-                                ),
-                                wp.element.createElement(
-                                    'p',
-                                    { className: 'atera-compact-calculator__cerdit' },
-                                    __('No credit card required', 'atera')
                                 ),
                                 wp.element.createElement(
                                     'div',
@@ -534,8 +347,12 @@
                                         wp.element.createElement('span', null, __('Atera', 'atera')),
                                         wp.element.createElement(
                                             'span',
-                                            { 'data-display-atera-cost': true },
-                                            '$0'
+                                            null,
+                                            new Intl.NumberFormat('en-US', {
+                                                style: 'currency',
+                                                currency: 'USD',
+                                                maximumFractionDigits: 0,
+                                            }).format(figures.ateraAnnual)
                                         )
                                     ),
                                     wp.element.createElement(
@@ -544,21 +361,26 @@
                                         wp.element.createElement('span', null, __('Current provider', 'atera')),
                                         wp.element.createElement(
                                             'span',
-                                            { 'data-display-current-cost': true },
-                                            '$0'
+                                            null,
+                                            new Intl.NumberFormat('en-US', {
+                                                style: 'currency',
+                                                currency: 'USD',
+                                                maximumFractionDigits: 0,
+                                            }).format(figures.currentAnnual)
                                         )
                                     )
-                                ),
+                                )
                             )
                         )
                     ),
-                      wp.element.createElement(
+                    wp.element.createElement(
                         'p',
-                        { className: 'atera-compact-calculator__summary-note' },
+                        { className: 'atera-compact-calculator__note' },
                         __('Prices are shown in US Dollars', 'atera')
                     )
                 )
             );
         },
+        save: () => null,
     });
 })(window.wp);

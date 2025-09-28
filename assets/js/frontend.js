@@ -1,36 +1,4 @@
 (function () {
-    const FALLBACK_CONFIG = {
-        sliders: [
-            {
-                id: 'technicians',
-                min: 0,
-                max: 20,
-                step: 1,
-                default: 5,
-                marks: [0, 5, 10, 15, 20],
-                format: { type: 'number' },
-            },
-            {
-                id: 'endpoints',
-                min: 0,
-                max: 2500,
-                step: 100,
-                default: 500,
-                marks: [0, 500, 1000, 1500, 2000, 2500],
-                format: { type: 'number', thousands: true },
-            },
-            {
-                id: 'endpointRate',
-                min: 1,
-                max: 20,
-                step: 1,
-                default: 3,
-                marks: [1, 3, 5, 7, 20],
-                format: { type: 'currency', currency: 'USD' },
-            },
-        ],
-    };
-
     const ATERA_SEAT_RATE = 149;
 
     const isEditor = () => {
@@ -53,27 +21,68 @@
         return `${normalisedRoot}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     };
 
-    const formatSliderValue = (slider, rawValue) => {
-        const value = Number(rawValue) || 0;
-        const format = slider && slider.format ? slider.format : { type: 'number' };
+    const normaliseSlider = (slider) => {
+        if (!slider || typeof slider !== 'object' || !slider.id) {
+            return null;
+        }
+
+        const min = Number(slider.min) || 0;
+        const max = Number(slider.max) || 0;
+        const step = Number(slider.step) || 1;
+        const defaultValue = slider.default !== undefined ? Number(slider.default) : min;
+
+        return {
+            id: slider.id,
+            label: slider.label || slider.id,
+            min,
+            max,
+            step,
+            default: defaultValue,
+            marks: Array.isArray(slider.marks) ? slider.marks : [],
+            format: slider.format || { type: 'number' },
+        };
+    };
+
+    const formatMarkValue = (slider, mark) => {
+        if (typeof mark !== 'number') {
+            return mark;
+        }
+
+        const format = slider.format || { type: 'number' };
 
         if (format.type === 'currency') {
             try {
                 return new Intl.NumberFormat('en-US', {
                     style: 'currency',
                     currency: format.currency || 'USD',
-                    maximumFractionDigits: 0,
-                }).format(value);
+                    maximumFractionDigits: format.maximumFractionDigits ?? 0,
+                }).format(mark);
             } catch (error) {
-                return `$${value.toLocaleString()}`;
+                return `$${mark.toLocaleString()}`;
             }
         }
 
         if (format.thousands) {
-            return value.toLocaleString();
+            return mark.toLocaleString();
         }
 
-        return value;
+        return mark;
+    };
+
+    const setRangeGradient = (input, slider) => {
+        if (!input || !slider) {
+            return;
+        }
+
+        const range = slider.max - slider.min;
+        const numericValue = Number(input.value);
+        const clamped = Number.isFinite(numericValue)
+            ? Math.min(Math.max(numericValue, slider.min), slider.max)
+            : slider.min;
+        const progress = range > 0 ? ((clamped - slider.min) / range) * 100 : 0;
+        const safeProgress = Math.max(0, Math.min(100, progress));
+
+        input.style.background = `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
     };
 
     const formatCurrency = (amount) =>
@@ -99,47 +108,41 @@
         };
     };
 
-    const setRangeGradient = (input, slider) => {
-        if (!input || !slider) {
-            return;
-        }
+    const buildSliderField = (slider) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'atera-compact-calculator__slider-field';
+        wrapper.setAttribute('data-slider', slider.id);
 
-        const min = Number(slider.min) || 0;
-        const max = Number(slider.max) || 0;
-        const range = max - min;
-        const numericValue = Number(input.value);
-        const clampedValue = Number.isFinite(numericValue)
-            ? Math.min(Math.max(numericValue, min), max)
-            : min;
-        const progress = range > 0 ? ((clampedValue - min) / range) * 100 : 0;
-        const safeProgress = Math.min(Math.max(progress, 0), 100);
+        const heading = document.createElement('div');
+        heading.className = 'atera-compact-calculator__slider-heading';
+        const label = document.createElement('span');
+        label.className = 'atera-compact-calculator__slider-label';
+        label.textContent = slider.label;
+        heading.appendChild(label);
 
-        input.style.background = `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
-    };
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.className = 'atera-compact-calculator__range';
+        input.min = slider.min;
+        input.max = slider.max;
+        input.step = slider.step;
+        input.value = slider.default;
+        input.setAttribute(`data-input-${slider.id}`, 'true');
+        setRangeGradient(input, slider);
 
-    const applySliderAttributes = (fieldWrapper, slider) => {
-        if (!fieldWrapper) {
-            return;
-        }
+        const scale = document.createElement('div');
+        scale.className = 'atera-compact-calculator__scale';
+        slider.marks.forEach((mark) => {
+            const markNode = document.createElement('span');
+            markNode.textContent = formatMarkValue(slider, mark);
+            scale.appendChild(markNode);
+        });
 
-        const input = fieldWrapper.querySelector(`[data-input-${slider.id}]`);
-        if (input) {
-            input.min = slider.min;
-            input.max = slider.max;
-            input.step = slider.step;
-            input.value = slider.default;
-            setRangeGradient(input, slider);
-        }
+        wrapper.appendChild(heading);
+        wrapper.appendChild(input);
+        wrapper.appendChild(scale);
 
-        const scale = fieldWrapper.querySelector('.atera-compact-calculator__scale');
-        if (scale && Array.isArray(slider.marks)) {
-            scale.innerHTML = slider.marks
-                .map((mark) => {
-                    const label = typeof mark === 'number' ? formatSliderValue(slider, mark) : mark;
-                    return `<span>${label}</span>`;
-                })
-                .join('');
-        }
+        return { wrapper, input };
     };
 
     const initialiseCalculator = (container, config) => {
@@ -147,28 +150,24 @@
             return;
         }
 
-        const sliderBindings = config.sliders
-            .map((slider) => {
-                const fieldWrapper = container.querySelector(
-                    `.atera-compact-calculator__slider-field[data-slider="${slider.id}"]`
-                );
+        const panel = container.querySelector('[data-calculator-panel]');
+        if (!panel) {
+            return;
+        }
 
-                const input = container.querySelector(`[data-input-${slider.id}]`);
+        panel.innerHTML = '';
 
-                applySliderAttributes(fieldWrapper, slider);
-
-                if (!input) {
-                    return null;
-                }
-
-                return {
-                    slider,
-                    input,
-                };
-            })
-            .filter(Boolean);
+        const sliderBindings = config.sliders.map((slider) => {
+            const { wrapper, input } = buildSliderField(slider);
+            panel.appendChild(wrapper);
+            return {
+                slider,
+                input,
+            };
+        });
 
         if (!sliderBindings.length) {
+            panel.innerHTML = '';
             return;
         }
 
@@ -196,12 +195,9 @@
             }
         };
 
-        sliderBindings.forEach(({ input, slider }) => {
-            ['input', 'change'].forEach((eventName) => {
-                input.addEventListener(eventName, updateOutputs);
-                input.addEventListener(eventName, () => setRangeGradient(input, slider));
-            });
-            setRangeGradient(input, slider);
+        sliderBindings.forEach(({ input }) => {
+            input.addEventListener('input', updateOutputs);
+            input.addEventListener('change', updateOutputs);
         });
 
         updateOutputs();
@@ -213,12 +209,17 @@
         })
             .then((response) => (response.ok ? response.json() : Promise.reject(response)))
             .then((data) => {
-                if (!data || !Array.isArray(data.sliders)) {
-                    return FALLBACK_CONFIG;
+                const sliders = (data?.sliders || [])
+                    .map(normaliseSlider)
+                    .filter(Boolean);
+
+                if (!sliders.length) {
+                    return null;
                 }
-                return data;
+
+                return { sliders };
             })
-            .catch(() => FALLBACK_CONFIG);
+            .catch(() => null);
 
     const bootstrap = () => {
         if (isEditor()) {
@@ -226,7 +227,19 @@
         }
 
         document.querySelectorAll('.atera-compact-calculator').forEach((calculator) => {
-            fetchConfig(calculator).then((config) => initialiseCalculator(calculator, config));
+            const panel = calculator.querySelector('[data-calculator-panel]');
+
+            fetchConfig(calculator).then((config) => {
+                if (!config) {
+                    if (panel) {
+                        panel.innerHTML = '<p class="atera-compact-calculator__loading">' +
+                            'Unable to load calculator settings.</p>';
+                    }
+                    return;
+                }
+
+                initialiseCalculator(calculator, config);
+            });
         });
     };
 
