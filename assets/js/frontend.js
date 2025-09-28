@@ -6,7 +6,7 @@
                 min: 0,
                 max: 20,
                 step: 1,
-                default: 10,
+                default: 5,
                 marks: [0, 5, 10, 15, 20],
                 format: { type: 'number' },
             },
@@ -15,7 +15,7 @@
                 min: 0,
                 max: 2500,
                 step: 100,
-                default: 1200,
+                default: 500,
                 marks: [0, 500, 1000, 1500, 2000, 2500],
                 format: { type: 'number', thousands: true },
             },
@@ -24,7 +24,7 @@
                 min: 1,
                 max: 20,
                 step: 1,
-                default: 7,
+                default: 3,
                 marks: [1, 3, 5, 7, 20],
                 format: { type: 'currency', currency: 'USD' },
             },
@@ -99,6 +99,24 @@
         };
     };
 
+    const setRangeGradient = (input, slider) => {
+        if (!input || !slider) {
+            return;
+        }
+
+        const min = Number(slider.min) || 0;
+        const max = Number(slider.max) || 0;
+        const range = max - min;
+        const numericValue = Number(input.value);
+        const clampedValue = Number.isFinite(numericValue)
+            ? Math.min(Math.max(numericValue, min), max)
+            : min;
+        const progress = range > 0 ? ((clampedValue - min) / range) * 100 : 0;
+        const safeProgress = Math.min(Math.max(progress, 0), 100);
+
+        input.style.background = `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
+    };
+
     const applySliderAttributes = (fieldWrapper, slider) => {
         if (!fieldWrapper) {
             return;
@@ -110,6 +128,7 @@
             input.max = slider.max;
             input.step = slider.step;
             input.value = slider.default;
+            setRangeGradient(input, slider);
         }
 
         const scale = fieldWrapper.querySelector('.atera-compact-calculator__scale');
@@ -161,6 +180,7 @@
             const values = {};
             sliderBindings.forEach(({ slider, input }) => {
                 values[slider.id] = input.value;
+                setRangeGradient(input, slider);
             });
 
             const figures = calculateFigures(values);
@@ -176,10 +196,12 @@
             }
         };
 
-        sliderBindings.forEach(({ input }) => {
+        sliderBindings.forEach(({ input, slider }) => {
             ['input', 'change'].forEach((eventName) => {
                 input.addEventListener(eventName, updateOutputs);
+                input.addEventListener(eventName, () => setRangeGradient(input, slider));
             });
+            setRangeGradient(input, slider);
         });
 
         updateOutputs();

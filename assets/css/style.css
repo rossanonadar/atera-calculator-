@@ -1,19 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
 
-.atera-compact-calculator {
+.entry-content.wp-block-post-content-is-layout-constrained {
     background: #f4f2f2;
+}
+
+.atera-compact-calculator {
     border-radius: 2.25rem;
     padding: clamp(2rem, 4vw, 4rem);
     font-family: 'Sora', 'Inter', sans-serif;
     color: #111827;
-    max-width: 87.5rem !important;
+    max-width: 97.5rem !important;
     margin: 0 auto;
 }
 
 .atera-compact-calculator__layout {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: clamp(1.5rem, 3vw, 3rem);
+    grid-template-columns: 31.9375rem 35.3125rem 27.9375rem;
+    gap: 1.5rem;
     align-items: stretch;
 }
 
@@ -82,21 +85,25 @@
 .atera-compact-calculator__range {
     width: 100%;
     appearance: none;
-    background: linear-gradient(90deg, #f5c26b 0%, #e7a55b 100%);
-    height: 0.375rem;
+    background: #e3dbd9;
+    height: 0.1875rem;
     border-radius: 999px;
     position: relative;
 }
 
+.atera-compact-calculator__range:focus {
+    outline: none;
+}
+
 .atera-compact-calculator__range::-webkit-slider-runnable-track {
-    height: 0.375rem;
-    background: linear-gradient(90deg, #f5c26b 0%, #e7a55b 100%);
+    height: 0.1875rem;
+    background: transparent;
     border-radius: 999px;
 }
 
 .atera-compact-calculator__range::-moz-range-track {
-    height: 0.375rem;
-    background: linear-gradient(90deg, #f5c26b 0%, #e7a55b 100%);
+    height: 0.1875rem;
+    background: transparent;
     border-radius: 999px;
 }
 
@@ -105,11 +112,11 @@
     appearance: none;
     width: 1.125rem;
     height: 1.125rem;
-    background: #ffffff;
+    background: #d58a2d;
     border: 0.1875rem solid #d58a2d;
     border-radius: 50%;
     box-shadow: 0 0.25rem 0.625rem rgba(213, 138, 45, 0.35);
-    margin-top: -0.375rem;
+    margin-top: -0.46875rem;
 }
 
 .atera-compact-calculator__range::-moz-range-thumb {
@@ -119,6 +126,7 @@
     border: 0.1875rem solid #d58a2d;
     border-radius: 50%;
     box-shadow: 0 0.25rem 0.625rem rgba(213, 138, 45, 0.35);
+    margin-top: -0.46875rem;
 }
 
 .atera-compact-calculator__scale {
@@ -142,7 +150,7 @@
 
 .atera-compact-calculator__summary-kicker {
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 400;
     color: rgba(255, 255, 255, 0.75);
 }
 
@@ -177,7 +185,6 @@
 }
 
 .atera-compact-calculator__summary-breakdown {
-    background: rgba(255, 255, 255, 0.08);
     border-radius: 1.25rem;
     padding: 1.125rem 1.375rem;
     display: flex;
@@ -187,7 +194,7 @@
 }
 
 .atera-compact-calculator__summary-breakdown-header {
-    font-weight: 600;
+    font-weight: 400;
     opacity: 0.85;
 }
 
@@ -197,10 +204,12 @@
     gap: 0.75rem;
 }
 
-.atera-compact-calculator__summary-note {
-    margin: 0;
+.atera-compact-calculator__note {
+    margin: 1.5rem 0 0 auto;
+    max-width: 27.9375rem;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(17, 24, 39, 0.6);
+    text-align: right;
 }
 
 @media (max-width: 68.75rem) {
