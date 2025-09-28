@@ -112,11 +112,6 @@
             input.value = slider.default;
         }
 
-        const display = fieldWrapper.querySelector(`[data-display-${slider.id}]`);
-        if (display) {
-            display.textContent = formatSliderValue(slider, slider.default);
-        }
-
         const scale = fieldWrapper.querySelector('.atera-compact-calculator__scale');
         if (scale && Array.isArray(slider.marks)) {
             scale.innerHTML = slider.marks
@@ -140,7 +135,6 @@
                 );
 
                 const input = container.querySelector(`[data-input-${slider.id}]`);
-                const display = container.querySelector(`[data-display-${slider.id}]`);
 
                 applySliderAttributes(fieldWrapper, slider);
 
@@ -151,7 +145,6 @@
                 return {
                     slider,
                     input,
-                    display,
                 };
             })
             .filter(Boolean);
@@ -166,11 +159,8 @@
 
         const updateOutputs = () => {
             const values = {};
-            sliderBindings.forEach(({ slider, input, display }) => {
+            sliderBindings.forEach(({ slider, input }) => {
                 values[slider.id] = input.value;
-                if (display) {
-                    display.textContent = formatSliderValue(slider, input.value);
-                }
             });
 
             const figures = calculateFigures(values);

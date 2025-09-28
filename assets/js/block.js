@@ -283,11 +283,10 @@
                                         ),
                                     config.sliders.map((slider) => {
                                         const currentValue = controls[slider.id];
-                                        const formattedValue = formatSliderValue(slider, currentValue);
 
                                         return wp.element.createElement(
-                                           'div',
-                                           {
+                                            'div',
+                                            {
                                                key: slider.id,
                                                 className: 'atera-compact-calculator__slider-field',
                                                 'data-slider': slider.id,
@@ -299,11 +298,6 @@
                                                     'span',
                                                     { className: 'atera-compact-calculator__slider-label' },
                                                     slider.label
-                                                ),
-                                                wp.element.createElement(
-                                                    'span',
-                                                    { className: 'atera-compact-calculator__slider-value' },
-                                                    formattedValue
                                                 )
                                             ),
                                             wp.element.createElement('input', {
@@ -448,14 +442,6 @@
                                                 'span',
                                                 { className: 'atera-compact-calculator__slider-label' },
                                                 slider.label
-                                            ),
-                                            wp.element.createElement(
-                                                'span',
-                                                {
-                                                    className: 'atera-compact-calculator__slider-value',
-                                                    [`data-display-${slider.id}`]: true,
-                                                },
-                                                formatSliderValue(slider, slider.default)
                                             )
                                         ),
                                         wp.element.createElement('input', {
