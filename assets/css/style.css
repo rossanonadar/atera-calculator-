@@ -195,7 +195,7 @@
 
 .atera-compact-calculator__summary-cta:hover,
 .atera-compact-calculator__summary-cta:focus {
-    transform: translateY(-2px);
+    outline: none;
     box-shadow: 0 1rem 2rem rgba(255, 31, 104, 0.35);
 }
 
