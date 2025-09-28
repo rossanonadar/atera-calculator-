@@ -1,5 +1,8 @@
 @import './font.css';
 
+.wp-block-group.wp-block-group-is-layout-constrained {
+    background: #f9f9f9;
+}
 .atera-compact-calculator {
     width: 100%;
     max-width: 87.5% !important;
