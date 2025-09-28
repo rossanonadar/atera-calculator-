@@ -340,9 +340,24 @@
                                         __('annually — estimated based on Atera’s Pro Plan', 'atera')
                                     ),
                                     wp.element.createElement(
+                                        'input',
+                                        {
+                                            className: 'atera-compact-calculator__input',
+                                            type: 'text',
+                                            placeholder: __('Enter your work email', 'atera'),
+                                            'aria-label': __('Enter your work email', 'atera'),
+                                        },
+                                        null // input can't have children
+                                    ),
+                                    wp.element.createElement(
                                         'div',
                                         { className: 'atera-compact-calculator__summary-cta' },
                                         __('Start free trial', 'atera')
+                                    ),
+                                     wp.element.createElement(
+                                        'p',
+                                        { className: 'atera-compact-calculator__cerdit' },
+                                        __('No credit card required', 'atera')
                                     ),
                                     wp.element.createElement(
                                         'div',
@@ -381,14 +396,14 @@
                                             )
                                         )
                                     ),
-                                    wp.element.createElement(
-                                        'p',
-                                        { className: 'atera-compact-calculator__summary-note' },
-                                        __('Prices are shown in US Dollars', 'atera')
-                                    )
                                 )
                             )
                         )
+                    ),
+                      wp.element.createElement(
+                        'p',
+                        { className: 'atera-compact-calculator__summary-note' },
+                        __('Prices are shown in US Dollars', 'atera')
                     )
                 )
             );
@@ -482,6 +497,16 @@
                                     { className: 'atera-compact-calculator__summary-subtext' },
                                     __('annually — estimated based on Atera’s Pro Plan', 'atera')
                                 ),
+                                 wp.element.createElement(
+                                        'input',
+                                        {
+                                            className: 'atera-compact-calculator__input',
+                                            type: 'text',
+                                            placeholder: __('Enter your work email', 'atera'),
+                                            'aria-label': __('Enter your work email', 'atera'),
+                                        },
+                                        null // input can't have children
+                                    ),
                                 wp.element.createElement(
                                     'a',
                                     {
@@ -489,6 +514,11 @@
                                         className: 'atera-compact-calculator__summary-cta',
                                     },
                                     __('Start free trial', 'atera')
+                                ),
+                                wp.element.createElement(
+                                    'p',
+                                    { className: 'atera-compact-calculator__cerdit' },
+                                    __('No credit card required', 'atera')
                                 ),
                                 wp.element.createElement(
                                     'div',
@@ -519,13 +549,13 @@
                                         )
                                     )
                                 ),
-                                wp.element.createElement(
-                                    'p',
-                                    { className: 'atera-compact-calculator__summary-note' },
-                                    __('Prices are shown in US Dollars', 'atera')
-                                )
                             )
                         )
+                    ),
+                      wp.element.createElement(
+                        'p',
+                        { className: 'atera-compact-calculator__summary-note' },
+                        __('Prices are shown in US Dollars', 'atera')
                     )
                 )
             );
