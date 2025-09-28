@@ -1,0 +1,119 @@
+.atera-compact-calculator {
+    border: 1px solid #dce0e5;
+    border-radius: 14px;
+    background: #ffffff;
+    padding: 24px;
+    color: #1f2933;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+
+.atera-compact-calculator__layout {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+}
+
+.atera-compact-calculator__column {
+    flex: 1 1 280px;
+    min-width: 260px;
+}
+
+.atera-compact-calculator__column--intro {
+    max-width: 320px;
+}
+
+.atera-compact-calculator__title {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin: 0 0 12px;
+}
+
+.atera-compact-calculator__helper {
+    margin: 0;
+    color: #5a6b7b;
+    font-size: 0.95rem;
+}
+
+.atera-compact-calculator__field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.atera-compact-calculator__label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 6px;
+}
+
+.atera-compact-calculator__input,
+.atera-compact-calculator__input--with-prefix {
+    font-size: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.atera-compact-calculator__input:focus {
+    outline: 2px solid #3b82f6;
+    border-color: #3b82f6;
+}
+
+.atera-compact-calculator__input-group {
+    display: flex;
+    align-items: center;
+}
+
+.atera-compact-calculator__input-prefix {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e0;
+    border-right: 0;
+    border-radius: 8px 0 0 8px;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: #1f2933;
+}
+
+.atera-compact-calculator__input--with-prefix {
+    border-radius: 0 8px 8px 0;
+    border-left: 0;
+}
+
+.atera-compact-calculator__results {
+    background: linear-gradient(135deg, #2563eb, #0ea5e9);
+    color: #ffffff;
+    padding: 18px 20px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.atera-compact-calculator__results-label {
+    font-size: 0.9rem;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.atera-compact-calculator__results-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+@media (max-width: 781px) {
+    .atera-compact-calculator {
+        padding: 20px;
+    }
+
+    .atera-compact-calculator__layout {
+        gap: 20px;
+    }
+
+    .atera-compact-calculator__column--intro,
+    .atera-compact-calculator__column--form {
+        max-width: 100%;
+    }
+}
