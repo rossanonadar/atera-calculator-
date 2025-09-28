@@ -1,0 +1,17 @@
+
+@font-face {
+    font-display: swap;
+    font-family: gellix;
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/Gellix-Regular.woff2') format("woff2"),url('../fonts/Gellix-Regular.woff2') format("woff")
+}
+
+
+@font-face {
+    font-display: swap;
+    font-family: nekst;
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/Nekst-Bold.woff2') format("woff2"),url('../fonts/Nekst-Bold.woff2 s') format("woff")
+}

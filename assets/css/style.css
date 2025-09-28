@@ -1,13 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
-
-.entry-content.wp-block-post-content-is-layout-constrained {
-    background: #f4f2f2;
-}
+@import './font.css';
 
 .atera-compact-calculator {
+    width: 100%;
     max-width: 87.5% !important;
     margin: 0 auto;
-    padding: 6rem 3rem;
+    padding: 6rem 0;
 }
 
 .atera-compact-calculator__layout { 
@@ -18,25 +15,19 @@
     gap: 1.5rem;
  
 }
-.atera-compact-calculator__column.atera-compact-calculator__column--intro {
-     width: 48%;
-} 
 
 .atera-compact-calculator__column {
      display: flex;
     flex-direction: column; 
 }
-
 .atera-compact-calculator__column--intro {
     justify-content: flex-start;
-     width: 25%;
+     width: 45%;
 }
 .atera-compact-calculator__column.atera-compact-calculator__column--panel {
-    width: 40%;
+    width: 45%;
 }
-.atera-compact-calculator__column.atera-compact-calculator__column--summary  {
-    width: 35%;
-} 
+
 
 .atera-compact-calculator__column {
     display: flex;
@@ -75,10 +66,11 @@
 }
 
 .atera-compact-calculator__panel-heading {
-    margin: 0;
+    font-family: 'gellix', 'Sora', sans-serif;
     font-size: 1.05rem;
     font-weight: 600;
     color: #353f41;
+    margin: 0;
 }
 
 .atera-compact-calculator__loading {
@@ -94,9 +86,11 @@
 }
 
 .atera-compact-calculator__slider-label {
+    font-family: 'gellix', 'Sora', sans-serif; 
     font-size: 0.95rem;
     font-weight: 400;
     color: #17262b;
+    font-family: 'gellix', 'Sora', sans-serif;
 }
 
 .atera-compact-calculator__range {
@@ -171,6 +165,7 @@
 }
 
 .atera-compact-calculator__summary-total {
+    font-family: 'Nekst', 'Sora', sans-serif;
     font-size: clamp(2.4rem, 3.4vw, 3.8rem);
     font-weight: 700;
 }
@@ -182,6 +177,7 @@
 }
 
 .atera-compact-calculator__summary-cta {
+    font-family: 'Nekst', 'Sora', sans-serif;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -202,7 +198,7 @@
 
 .atera-compact-calculator__summary-breakdown {
     border-radius: 1.25rem;
-    padding: 1.125rem 1.375rem;
+    padding: 1.125rem 0;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -210,11 +206,13 @@
 }
 
 .atera-compact-calculator__summary-breakdown-header {
+    font-family: 'gellix', 'Sora', sans-serif;  
     font-weight: 400;
     opacity: 0.85;
 }
 
 .atera-compact-calculator__summary-breakdown-row {
+    font-family: 'gellix', 'Sora', sans-serif;  
     display: flex;
     justify-content: space-between;
     gap: 0.75rem;
