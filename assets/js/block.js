@@ -102,7 +102,7 @@
                 type: 'string',
                 source: 'html',
                 selector: '.atera-compact-calculator__title',
-                default: __('Calculate how much you save with <br>Atera', 'atera'),
+                default: __('Calculate how much you save with Atera', 'atera'),
             },
         },
         edit: (props) => {
