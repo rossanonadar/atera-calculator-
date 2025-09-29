@@ -17,3 +17,4 @@ if ( ! defined( 'ATERA_CALC_PLUGIN_FILE' ) ) {
 }
 
 require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/init.php';
+require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/render.php';
