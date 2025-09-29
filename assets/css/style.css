@@ -242,16 +242,25 @@
     color: rgba(17, 24, 39, 0.6);
     text-align: right;
 }
+.atera-compact-calculator__summary-note {
+    font-weight: 400;
+    font-style: Regular;
+    font-size: 14px;
+    line-height: 140%;
+    letter-spacing: 0px;
+    text-align: right;
+    padding: 1rem 0 0 0;
+}
 
-@media (max-width: 68.75rem) {
+ @media (max-width: 68.75rem) {
     .atera-compact-calculator__layout {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .atera-compact-calculator {
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 0 1.5rem
-}
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 0 1.5rem
+    }
 }
 
 @media (max-width: 51.25rem) {
@@ -264,10 +273,10 @@
     .atera-compact-calculator__summary-note {
         text-align: center !important;
     }
-    .has-global-padding {
-        padding-right: 1rem!important;
-        padding-left: 1rem !important;
-    }
+     .has-global-padding {
+        padding-right: 1.5rem!important;
+        padding-left: 1.5rem !important;
+    } 
     .atera-compact-calculator__cerdit {
         display: block;
         font-size: 12px;
@@ -317,9 +326,9 @@
         padding: 1.75rem; 
     }
 
-    .atera-compact-calculator__layout {
+    /* .atera-compact-calculator__layout {
         grid-template-columns: 1fr;
-    }
+    } */
 
     .atera-compact-calculator__summary-card {
         padding: 1.75rem 0.875rem;
@@ -331,13 +340,4 @@
         padding: 0rem;
     }
 
-}
-.atera-compact-calculator__summary-note {
-    font-weight: 400;
-    font-style: Regular;
-    font-size: 14px;
-    line-height: 140%;
-    letter-spacing: 0px;
-    text-align: right;
-    padding: 1rem 0 0 0;
 }
