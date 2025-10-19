@@ -39,11 +39,16 @@ function atera_compact_calculator_render_block( $attributes ) {
         ? $attributes['noteText']
         : __( 'Prices are shown in US Dollars', 'atera' );
 
-    $currency_prefix = apply_filters( 'atera_compact_calculator_currency_prefix', '$', $attributes );
+    $currency_prefix = apply_filters(
+        'atera_compact_calculator_currency_prefix',
+        atera_compact_calculator_default_prefix(),
+        $attributes
+    );
+    $config_endpoint = esc_url( rest_url( 'atera/v1/calculator-config' ) );
 
     ob_start();
     ?>
-    <div class="atera-compact-calculator" data-config-endpoint="/atera/v1/calculator-config" data-currency-prefix="<?php echo esc_attr( $currency_prefix ); ?>">
+    <div class="atera-compact-calculator" data-config-endpoint="<?php echo $config_endpoint; ?>" data-currency-prefix="<?php echo esc_attr( $currency_prefix ); ?>">
         <div class="atera-compact-calculator__layout">
             <div class="atera-compact-calculator__column atera-compact-calculator__column--intro">
                 <h2 class="atera-compact-calculator__title"><?php echo wp_kses_post( $title ); ?></h2>

@@ -26,12 +26,12 @@
     const formatMarkValue = utils.formatMarkValue || ((slider, mark) => mark);
     const applyRangeGradient = utils.applyRangeGradient || (() => {});
 
-    const formatCurrency = (amount) =>
-        new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            maximumFractionDigits: 0,
-        }).format(amount || 0);
+    const formatCurrency = utils.formatCurrency || ((amount, options) => {
+        const settings = options || {};
+        const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
+        const numericAmount = Number(amount) || 0;
+        return `${prefix}${numericAmount.toLocaleString('en-US', { maximumFractionDigits: settings.maximumFractionDigits || 0 })}`;
+    });
 
     const calculateFigures = (values) => (
         utils.calculateFigures ? utils.calculateFigures(values, ATERA_SEAT_RATE) : { savings: 0, ateraAnnual: 0, currentAnnual: 0 }

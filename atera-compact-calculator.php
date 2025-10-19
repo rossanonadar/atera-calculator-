@@ -13,7 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 // Define plugin file constant. 
 if ( ! defined( 'ATERA_CALC_PLUGIN_FILE' ) ) {
-    define( 'ATERA_CALC_PLUGIN_FILE', __FILE__ ); // Define the plugin file constant
+    define( 'ATERA_CALC_PLUGIN_FILE', __FILE__ );
+}
+
+if ( ! defined( 'ATERA_CALC_REMOTE_CONFIG_URL' ) ) {
+    define( 'ATERA_CALC_REMOTE_CONFIG_URL', 'https://wwwatera-dev.s3.us-east-1.amazonaws.com/app/uploads/calc-sliders.json' );
 }
 
 require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/init.php';

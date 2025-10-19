@@ -152,6 +152,7 @@
 
             const blockProps = useBlockProps({
                 className: 'atera-compact-calculator',
+                'data-config-endpoint': '/atera/v1/calculator-config',
                 'data-currency-prefix': currencyPrefix,
             });
 
