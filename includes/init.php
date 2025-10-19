@@ -62,17 +62,41 @@ function atera_compact_calculator_load_local_config() {
 }
 
 /**
+ * Provide a default remote URL via option, env, or constant.
+ *
+ * @param string $url Existing URL from other filters.
+ * @return string
+ */
+function atera_compact_calculator_filter_remote_url( $url ) {
+    if ( ! empty( $url ) ) {
+        return $url;
+    }
+
+    $option = get_option( 'atera_compact_calculator_remote_url', '' );
+    if ( ! empty( $option ) ) {
+        return trim( $option );
+    }
+
+    $env = getenv( 'ATERA_CALC_REMOTE_CONFIG_URL' );
+    if ( ! empty( $env ) ) {
+        return trim( $env );
+    }
+
+    if ( defined( 'ATERA_CALC_REMOTE_CONFIG_URL' ) ) {
+        return trim( (string) ATERA_CALC_REMOTE_CONFIG_URL );
+    }
+
+    return $url;
+}
+add_filter( 'atera_compact_calculator_remote_config_url', 'atera_compact_calculator_filter_remote_url', 5 );
+
+/**
  * Attempt to load the calculator configuration from the remote endpoint.
  *
  * @return array|WP_Error
  */
 function atera_compact_calculator_load_remote_config() {
-    $settings = get_option( 'atera_compact_calculator_settings', array() );
-    $remote_url = isset( $settings['remote_config_url'] ) ? $settings['remote_config_url'] : '';
-
-    if ( empty( $remote_url ) && defined( 'ATERA_CALC_REMOTE_CONFIG_URL' ) ) {
-        $remote_url = ATERA_CALC_REMOTE_CONFIG_URL;
-    }
+    $remote_url = get_option( 'atera_compact_calculator_remote_url', '' );
 
     $remote_url = apply_filters( 'atera_compact_calculator_remote_config_url', $remote_url );
 
@@ -255,6 +279,68 @@ function atera_compact_calculator_default_prefix() {
 
     return '$';
 }
+
+/**
+ * Sanitize the remote configuration URL.
+ *
+ * @param string $value Raw option value.
+ * @return string
+ */
+function atera_compact_calculator_sanitize_remote_url( $value ) {
+    $value = trim( (string) $value );
+
+    if ( '' === $value ) {
+        return '';
+    }
+
+    return esc_url_raw( $value );
+}
+
+/**
+ * Settings field renderer for the remote configuration URL.
+ */
+function atera_compact_calculator_remote_url_field() {
+    $value = get_option( 'atera_compact_calculator_remote_url', '' );
+
+    printf(
+        '<input type="url" id="atera_compact_calculator_remote_url" name="atera_compact_calculator_remote_url" class="regular-text" value="%s" placeholder="https://example.com/path/to/calc-sliders.json" />',
+        esc_attr( $value )
+    );
+
+    echo '<p class="description">' . esc_html__( 'URL of the JSON configuration for the compact calculator. Leave empty to use the bundled defaults.', 'atera' ) . '</p>';
+}
+
+/**
+ * Register calculator settings on the general settings page.
+ */
+function atera_compact_calculator_register_settings() {
+    register_setting(
+        'general',
+        'atera_compact_calculator_remote_url',
+        array(
+            'type'              => 'string',
+            'sanitize_callback' => 'atera_compact_calculator_sanitize_remote_url',
+            'default'           => '',
+        )
+    );
+
+    add_settings_field(
+        'atera_compact_calculator_remote_url',
+        __( 'Calculator config URL', 'atera' ),
+        'atera_compact_calculator_remote_url_field',
+        'general'
+    );
+}
+add_action( 'admin_init', 'atera_compact_calculator_register_settings' );
+
+/**
+ * Flush cached configuration when the remote URL is updated.
+ */
+function atera_compact_calculator_flush_cached_config() {
+    delete_transient( 'atera_compact_calculator_config_v1' );
+}
+add_action( 'update_option_atera_compact_calculator_remote_url', 'atera_compact_calculator_flush_cached_config' );
+add_action( 'add_option_atera_compact_calculator_remote_url', 'atera_compact_calculator_flush_cached_config' );
 
 /**
  * Register block assets and configuration.

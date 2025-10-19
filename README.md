@@ -14,8 +14,8 @@ Atera Compact Calculator is a WordPress plugin that ships a single dynamic block
 
 ## Usage
 - Insert the **Atera Compact Calculator** block in the editor (Add block → Widgets).
-- Optionally edit the block title in the sidebar controls or directly within the block.
-- Publish or update the post/page. On the front end, the block loads its slider configuration and replaces the loading state with interactive controls.
+- Adjust the title, summary kicker, CTA label, footer note, and other copy via the block sidebar or inline fields.
+- Publish or update the page. On the front end, the block fetches its configuration and replaces the loading state with the interactive calculator.
 
 ## How It Works
 - The block markup is rendered server-side by `atera_compact_calculator_render_block()` (see `includes/render.php`). This keeps the initial layout accessible and crawlable.
@@ -25,7 +25,8 @@ Atera Compact Calculator is a WordPress plugin that ships a single dynamic block
 - Editor-side behaviour is handled by `assets/js/block.js`, which mirrors the frontend calculator so authors see live estimates while editing.
 
 ## Customisation
-- Update `calc-sliders.json` to change slider labels, ranges, defaults, or formatting. The block will reflect the new values automatically without rebuilding assets.
+- Update `calc-sliders.json` to change slider labels, ranges, defaults, or formatting. These act as built-in defaults and are used whenever the remote config cannot be reached.
+- Supply a remote configuration URL so the calculator stays synchronised with an external JSON file: go to **Settings → General → Calculator config URL** and enter the endpoint (e.g. `https://example.com/path/to/calc-sliders.json`). You can also provide it via the `ATERA_CALC_REMOTE_CONFIG_URL` environment variable/constant or the `atera_compact_calculator_remote_config_url` filter.
 - Styles can be adjusted in `assets/css/style.css` (frontend) and `assets/css/editor.css` (editor preview).
 - The summary CTA currently links to `#start-trial`. Replace or augment this in `includes/render.php` if a different target is required.
 
