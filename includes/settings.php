@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings and sanitisation for the Atera Compact Calculator plugin.
+ * Settings registration for Atera Compact Calculator.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
