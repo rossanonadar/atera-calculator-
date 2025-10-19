@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return string
  */
 function atera_compact_calculator_render_block( $attributes ) {
-    $default_title  = __( 'Calculate how much you save with <br>Atera', 'atera' );
+    $default_title  = __( 'Calculate how much you save with Atera', 'atera' );
     $title_attribute = isset( $attributes['title'] ) ? $attributes['title'] : '';
     $title          = '' !== trim( wp_strip_all_tags( (string) $title_attribute ) ) ? $title_attribute : $default_title;
     $summary_kicker = isset( $attributes['summaryKicker'] ) && '' !== trim( $attributes['summaryKicker'] )

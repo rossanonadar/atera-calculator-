@@ -12,7 +12,7 @@
 
     const ATERA_SEAT_RATE = 149;
 
-    const DEFAULT_TITLE = __('Calculate how much you save with <br>Atera', 'atera');
+    const DEFAULT_TITLE = __('Calculate how much you save with Atera', 'atera');
     const DEFAULT_CTA = __('Start free trial', 'atera');
     const DEFAULT_SUBTEXT = __('annually — estimated based on Atera’s Pro Plan', 'atera');
     const DEFAULT_BREAKDOWN_HEADER = __('Average annual cost', 'atera');
