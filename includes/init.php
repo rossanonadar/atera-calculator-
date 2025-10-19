@@ -11,8 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Safely resolve an asset version based on modification time.
  *
  * @param string $relative_path Asset path relative to the plugin root.
- * @return string|int
- */
+ */ 
 function atera_compact_calculator_asset_version( $relative_path ) {
     $absolute_path = plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . ltrim( $relative_path, '/' );
 
@@ -69,9 +68,17 @@ function atera_compact_calculator_register_block() {
     $asset_url = plugins_url( 'assets/', ATERA_CALC_PLUGIN_FILE );
 
     wp_register_script(
+        'atera-compact-calculator-utils',
+        $asset_url . 'js/utils.js',
+        array(),
+        atera_compact_calculator_asset_version( 'assets/js/utils.js' ),
+        true
+    );
+
+    wp_register_script(
         'atera-compact-calculator-block',
         $asset_url . 'js/block.js',
-        array( 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-components', 'wp-block-editor', 'wp-api-fetch' ),
+        array( 'atera-compact-calculator-utils', 'wp-blocks', 'wp-element', 'wp-i18n', 'wp-components', 'wp-block-editor', 'wp-api-fetch' ),
         atera_compact_calculator_asset_version( 'assets/js/block.js' ),
         true
     );
@@ -79,7 +86,7 @@ function atera_compact_calculator_register_block() {
     wp_register_script(
         'atera-compact-calculator-frontend',
         $asset_url . 'js/frontend.js',
-        array(),
+        array( 'atera-compact-calculator-utils', 'wp-i18n' ),
         atera_compact_calculator_asset_version( 'assets/js/frontend.js' ),
         true
     );
@@ -101,10 +108,10 @@ function atera_compact_calculator_register_block() {
     register_block_type(
         'atera/compact-calculator',
         array(
-            'editor_script'   => 'atera-compact-calculator-block',
+           'editor_script'   => 'atera-compact-calculator-block',
             'script'          => 'atera-compact-calculator-frontend',
             'style'           => 'atera-compact-calculator-style',
-            'editor_style'    => 'atera-compact-calculator-editor-style',
+          ///  'editor_style'    => 'atera-compact-calculator-editor-style',
             'attributes'      => array(
                 'title'         => array(
                     'type'    => 'string',

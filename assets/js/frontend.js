@@ -1,4 +1,5 @@
 (function () {
+    const utils = window.ateraCompactCalculatorUtils || {};
     const ATERA_SEAT_RATE = 149;
 
     const isEditor = () => {
@@ -21,69 +22,9 @@
         return `${normalisedRoot}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
     };
 
-    const normaliseSlider = (slider) => {
-        if (!slider || typeof slider !== 'object' || !slider.id) {
-            return null;
-        }
-
-        const min = Number(slider.min) || 0;
-        const max = Number(slider.max) || 0;
-        const step = Number(slider.step) || 1;
-        const defaultValue = slider.default !== undefined ? Number(slider.default) : min;
-
-        return {
-            id: slider.id,
-            label: slider.label || slider.id,
-            min,
-            max,
-            step,
-            default: defaultValue,
-            marks: Array.isArray(slider.marks) ? slider.marks : [],
-            format: slider.format || { type: 'number' },
-        };
-    };
-
-    const formatMarkValue = (slider, mark) => {
-        if (typeof mark !== 'number') {
-            return mark;
-        }
-
-        const format = slider.format || { type: 'number' };
-
-        if (format.type === 'currency') {
-            try {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: format.currency || 'USD',
-                    maximumFractionDigits: format.maximumFractionDigits ?? 0,
-                }).format(mark);
-            } catch (error) {
-                return `$${mark.toLocaleString()}`;
-            }
-        }
-
-        if (format.thousands) {
-            return mark.toLocaleString();
-        }
-
-        return mark;
-    };
-
-    const setRangeGradient = (input, slider) => {
-        if (!input || !slider) {
-            return;
-        }
-
-        const range = slider.max - slider.min;
-        const numericValue = Number(input.value);
-        const clamped = Number.isFinite(numericValue)
-            ? Math.min(Math.max(numericValue, slider.min), slider.max)
-            : slider.min;
-        const progress = range > 0 ? ((clamped - slider.min) / range) * 100 : 0;
-        const safeProgress = Math.max(0, Math.min(100, progress));
-
-        input.style.background = `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
-    };
+    const normaliseSlider = utils.normaliseSlider || ((slider) => slider);
+    const formatMarkValue = utils.formatMarkValue || ((slider, mark) => mark);
+    const applyRangeGradient = utils.applyRangeGradient || (() => {});
 
     const formatCurrency = (amount) =>
         new Intl.NumberFormat('en-US', {
@@ -92,21 +33,9 @@
             maximumFractionDigits: 0,
         }).format(amount || 0);
 
-    const calculateFigures = (values) => {
-        const technicians = Number(values.technicians) || 0;
-        const endpoints = Number(values.endpoints) || 0;
-        const endpointRate = Number(values.endpointRate) || 0;
-
-        const currentAnnual = endpoints * endpointRate * 12;
-        const ateraAnnual = technicians * ATERA_SEAT_RATE * 12;
-        const savings = Math.max(currentAnnual - ateraAnnual, 0);
-
-        return {
-            savings,
-            ateraAnnual,
-            currentAnnual,
-        };
-    };
+    const calculateFigures = (values) => (
+        utils.calculateFigures ? utils.calculateFigures(values, ATERA_SEAT_RATE) : { savings: 0, ateraAnnual: 0, currentAnnual: 0 }
+    );
 
     const buildSliderField = (slider) => {
         const wrapper = document.createElement('div');
@@ -128,7 +57,7 @@
         input.step = slider.step;
         input.value = slider.default;
         input.setAttribute(`data-input-${slider.id}`, 'true');
-        setRangeGradient(input, slider);
+        applyRangeGradient(input, slider);
 
         const scale = document.createElement('div');
         scale.className = 'atera-compact-calculator__scale';
@@ -179,7 +108,7 @@
             const values = {};
             sliderBindings.forEach(({ slider, input }) => {
                 values[slider.id] = input.value;
-                setRangeGradient(input, slider);
+                applyRangeGradient(input, slider);
             });
 
             const figures = calculateFigures(values);

@@ -1,3 +1,5 @@
+// Atera Compact Calculator Block
+// Block script for the Atera Compact Calculator Gutenberg block.
 (function (wp) {
     const { __ } = wp.i18n;
     const { registerBlockType } = wp.blocks;
@@ -5,6 +7,8 @@
     const { useBlockProps, RichText, InspectorControls } = wp.blockEditor;
     const { PanelBody, TextControl, Notice, Spinner } = wp.components;
     const apiFetch = wp.apiFetch;
+
+    const utils = window.ateraCompactCalculatorUtils || {};
 
     const ATERA_SEAT_RATE = 149;
 
@@ -15,85 +19,12 @@
     const DEFAULT_LABEL_ATERA = __('Atera', 'atera');
     const DEFAULT_LABEL_CURRENT = __('Current provider', 'atera');
 
-    const normaliseSlider = (slider) => {
-        if (!slider || typeof slider !== 'object' || !slider.id) {
-            return null;
-        }
-
-        const min = Number(slider.min) || 0;
-        const max = Number(slider.max) || 0;
-        const step = Number(slider.step) || 1;
-        const defaultValue = slider.default !== undefined ? Number(slider.default) : min;
-
-        return {
-            id: slider.id,
-            label: slider.label || slider.id,
-            min,
-            max,
-            step,
-            default: defaultValue,
-            marks: Array.isArray(slider.marks) ? slider.marks : [],
-            format: slider.format || { type: 'number' },
-        };
-    };
-
-    const formatMarkValue = (slider, mark) => {
-        if (typeof mark !== 'number') {
-            return mark;
-        }
-
-        const format = slider.format || { type: 'number' };
-
-        if (format.type === 'currency') {
-            try {
-                return new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: format.currency || 'USD',
-                    maximumFractionDigits: format.maximumFractionDigits ?? 0,
-                }).format(mark);
-            } catch (error) {
-                return `$${mark.toLocaleString()}`;
-            }
-        }
-
-        if (format.thousands) {
-            return mark.toLocaleString();
-        }
-
-        return mark;
-    };
-
-    const calculateFigures = (values) => {
-        const technicians = Number(values.technicians) || 0;
-        const endpoints = Number(values.endpoints) || 0;
-        const endpointRate = Number(values.endpointRate) || 0;
-
-        const currentAnnual = endpoints * endpointRate * 12;
-        const ateraAnnual = technicians * ATERA_SEAT_RATE * 12;
-        const savings = Math.max(currentAnnual - ateraAnnual, 0);
-
-        return {
-            savings,
-            ateraAnnual,
-            currentAnnual,
-        };
-    };
-
-    const getRangeGradient = (slider, rawValue) => {
-        if (!slider) {
-            return undefined;
-        }
-
-        const range = slider.max - slider.min;
-        const numericValue = Number(rawValue);
-        const clamped = Number.isFinite(numericValue)
-            ? Math.min(Math.max(numericValue, slider.min), slider.max)
-            : slider.min;
-        const progress = range > 0 ? ((clamped - slider.min) / range) * 100 : 0;
-        const safeProgress = Math.max(0, Math.min(100, progress));
-
-        return `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
-    };
+    const normaliseSlider = utils.normaliseSlider || ((slider) => slider);
+    const formatMarkValue = utils.formatMarkValue || ((slider, mark) => mark);
+    const calculateFigures = (values) => (
+        utils.calculateFigures ? utils.calculateFigures(values, ATERA_SEAT_RATE) : { savings: 0, ateraAnnual: 0, currentAnnual: 0 }
+    );
+    const getRangeGradient = utils.getRangeGradient || (() => undefined);
 
     registerBlockType('atera/compact-calculator', {
         apiVersion: 2,
@@ -158,7 +89,7 @@
 
                         const sliders = (response?.sliders || [])
                             .map(normaliseSlider)
-                            .filter(Boolean);
+                            .filter(Boolean); // Remove invalid sliders
 
                         if (!sliders.length) {
                             throw new Error('invalid-config');
@@ -196,15 +127,15 @@
 
             const figures = useMemo(() => calculateFigures(controls), [controls]);
 
-            const handleSliderChange = (id) => (event) => {
-                const value = event?.target?.value ?? event;
-                setControls((prev) => ({
-                    ...prev,
-                    [id]: value,
+            const handleSliderChange = (id) => (event) => { // Handle both event and direct value
+                const value = event?.target?.value ?? event; // Direct value
+                setControls((prev) => ({ // Update specific control
+                    ...prev, // Copy previous controls
+                    [id]: value, // Update the changed control
                 }));
             };
 
-            const blockProps = useBlockProps({ className: 'atera-compact-calculator' });
+            const blockProps = useBlockProps({ className: 'atera-compact-calculator' }); // Block wrapper
 
             const renderSliders = () => {
                 if (!config) {
@@ -257,6 +188,7 @@
                 });
             };
 
+            // Panel content based on loading/error state
             const panelChildren = () => {
                 if (loading) {
                     return wp.element.createElement(
@@ -474,4 +406,4 @@
         },
         save: () => null,
     });
-})(window.wp);
+})(window.wp); // End block scope
