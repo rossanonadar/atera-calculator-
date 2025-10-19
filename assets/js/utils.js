@@ -98,5 +98,19 @@
         }
     };
 
+    utils.formatCurrency = (amount, options) => {
+        const settings = options || {};
+        const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
+        const maximumFractionDigits = Number.isFinite(settings.maximumFractionDigits)
+            ? settings.maximumFractionDigits
+            : 0;
+
+        const numericAmount = utils.toNumber(amount, 0);
+
+        return `${prefix}${Number(numericAmount).toLocaleString('en-US', {
+            maximumFractionDigits,
+        })}`;
+    };
+
     global.ateraCompactCalculatorUtils = utils;
 })(window);

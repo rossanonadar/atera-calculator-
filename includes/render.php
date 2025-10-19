@@ -35,10 +35,15 @@ function atera_compact_calculator_render_block( $attributes ) {
     $label_current = isset( $attributes['labelCurrentProvider'] ) && '' !== trim( $attributes['labelCurrentProvider'] )
         ? $attributes['labelCurrentProvider']
         : __( 'Current provider', 'atera' );
+    $note_text = isset( $attributes['noteText'] ) && '' !== trim( $attributes['noteText'] )
+        ? $attributes['noteText']
+        : __( 'Prices are shown in US Dollars', 'atera' );
+
+    $currency_prefix = apply_filters( 'atera_compact_calculator_currency_prefix', '$', $attributes );
 
     ob_start();
     ?>
-    <div class="atera-compact-calculator" data-config-endpoint="/atera/v1/calculator-config">
+    <div class="atera-compact-calculator" data-config-endpoint="/atera/v1/calculator-config" data-currency-prefix="<?php echo esc_attr( $currency_prefix ); ?>">
         <div class="atera-compact-calculator__layout">
             <div class="atera-compact-calculator__column atera-compact-calculator__column--intro">
                 <h2 class="atera-compact-calculator__title"><?php echo wp_kses_post( $title ); ?></h2>
@@ -51,24 +56,24 @@ function atera_compact_calculator_render_block( $attributes ) {
             <div class="atera-compact-calculator__column atera-compact-calculator__column--summary">
                 <div class="atera-compact-calculator__summary-card">
                     <div class="atera-compact-calculator__summary-kicker"><?php echo esc_html( $summary_kicker ); ?></div>
-                    <div class="atera-compact-calculator__summary-total" data-display-savings>$0</div>
+                    <div class="atera-compact-calculator__summary-total" data-display-savings><?php echo esc_html( $currency_prefix . '0' ); ?></div>
                     <p class="atera-compact-calculator__summary-subtext"><?php echo esc_html( $summary_subtext ); ?></p>
                     <a href="#start-trial" class="atera-compact-calculator__summary-cta"><?php echo esc_html( $summary_cta ); ?></a>
                     <div class="atera-compact-calculator__summary-breakdown">
                         <div class="atera-compact-calculator__summary-breakdown-header"><?php echo esc_html( $summary_breakdown_header ); ?></div>
                         <div class="atera-compact-calculator__summary-breakdown-row">
                             <span><?php echo esc_html( $label_atera ); ?></span>
-                            <span data-display-atera-cost>$0</span>
+                            <span data-display-atera-cost><?php echo esc_html( $currency_prefix . '0' ); ?></span>
                         </div>
                         <div class="atera-compact-calculator__summary-breakdown-row">
                             <span><?php echo esc_html( $label_current ); ?></span>
-                            <span data-display-current-cost>$0</span>
+                            <span data-display-current-cost><?php echo esc_html( $currency_prefix . '0' ); ?></span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <p class="atera-compact-calculator__note"><?php esc_html_e( 'Prices are shown in US Dollars', 'atera' ); ?></p>
+        <p class="atera-compact-calculator__note"><?php echo esc_html( $note_text ); ?></p>
     </div>
     <?php
 

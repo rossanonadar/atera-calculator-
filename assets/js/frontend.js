@@ -100,6 +100,11 @@
             return;
         }
 
+        const containerPrefix = container.getAttribute('data-currency-prefix') || '$';
+        const prefix = typeof config.prefix === 'string' ? config.prefix : containerPrefix;
+
+        container.setAttribute('data-currency-prefix', prefix);
+
         const savingsNode = container.querySelector('[data-display-savings]');
         const ateraCostNode = container.querySelector('[data-display-atera-cost]');
         const currentCostNode = container.querySelector('[data-display-current-cost]');
@@ -114,13 +119,13 @@
             const figures = calculateFigures(values);
 
             if (savingsNode) {
-                savingsNode.textContent = formatCurrency(figures.savings);
+                savingsNode.textContent = formatCurrency(figures.savings, { prefix, maximumFractionDigits: 0 });
             }
             if (ateraCostNode) {
-                ateraCostNode.textContent = formatCurrency(figures.ateraAnnual);
+                ateraCostNode.textContent = formatCurrency(figures.ateraAnnual, { prefix, maximumFractionDigits: 0 });
             }
             if (currentCostNode) {
-                currentCostNode.textContent = formatCurrency(figures.currentAnnual);
+                currentCostNode.textContent = formatCurrency(figures.currentAnnual, { prefix, maximumFractionDigits: 0 });
             }
         };
 
@@ -141,12 +146,13 @@
                 const sliders = (data?.sliders || [])
                     .map(normaliseSlider)
                     .filter(Boolean);
+                const prefix = typeof data?.prefix === 'string' ? data.prefix : null;
 
                 if (!sliders.length) {
                     return null;
                 }
 
-                return { sliders };
+                return { sliders, prefix };
             })
             .catch(() => null);
 
