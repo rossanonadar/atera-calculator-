@@ -105,6 +105,36 @@ function atera_compact_calculator_register_block() {
             'script'          => 'atera-compact-calculator-frontend',
             'style'           => 'atera-compact-calculator-style',
             'editor_style'    => 'atera-compact-calculator-editor-style',
+            'attributes'      => array(
+                'title'         => array(
+                    'type'    => 'string',
+                    'default' => __( 'Calculate how much you save with <br>Atera', 'atera' ),
+                ),
+                'summaryKicker' => array(
+                    'type'    => 'string',
+                    'default' => __( 'You save', 'atera' ),
+                ),
+                'summaryCta'    => array(
+                    'type'    => 'string',
+                    'default' => __( 'Start free trial', 'atera' ),
+                ),
+                'summarySubtext' => array(
+                    'type'    => 'string',
+                    'default' => __( 'annually — estimated based on Atera’s Pro Plan', 'atera' ),
+                ),
+                'summaryBreakdownHeader' => array(
+                    'type'    => 'string',
+                    'default' => __( 'Average annual cost', 'atera' ),
+                ),
+                'labelAtera' => array(
+                    'type'    => 'string',
+                    'default' => __( 'Atera', 'atera' ),
+                ),
+                'labelCurrentProvider' => array(
+                    'type'    => 'string',
+                    'default' => __( 'Current provider', 'atera' ),
+                ),
+            ),
             'render_callback' => 'atera_compact_calculator_render_block',
         )
     );

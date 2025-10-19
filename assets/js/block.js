@@ -8,6 +8,13 @@
 
     const ATERA_SEAT_RATE = 149;
 
+    const DEFAULT_TITLE = __('Calculate how much you save with <br>Atera', 'atera');
+    const DEFAULT_CTA = __('Start free trial', 'atera');
+    const DEFAULT_SUBTEXT = __('annually — estimated based on Atera’s Pro Plan', 'atera');
+    const DEFAULT_BREAKDOWN_HEADER = __('Average annual cost', 'atera');
+    const DEFAULT_LABEL_ATERA = __('Atera', 'atera');
+    const DEFAULT_LABEL_CURRENT = __('Current provider', 'atera');
+
     const normaliseSlider = (slider) => {
         if (!slider || typeof slider !== 'object' || !slider.id) {
             return null;
@@ -100,9 +107,31 @@
         attributes: {
             title: {
                 type: 'string',
-                source: 'html',
-                selector: '.atera-compact-calculator__title',
-                default: __('Calculate how much you save with Atera', 'atera'),
+                default: DEFAULT_TITLE,
+            },
+            summaryKicker: {
+                type: 'string',
+                default: __('You save', 'atera'),
+            },
+            summaryCta: {
+                type: 'string',
+                default: DEFAULT_CTA,
+            },
+            summarySubtext: {
+                type: 'string',
+                default: DEFAULT_SUBTEXT,
+            },
+            summaryBreakdownHeader: {
+                type: 'string',
+                default: DEFAULT_BREAKDOWN_HEADER,
+            },
+            labelAtera: {
+                type: 'string',
+                default: DEFAULT_LABEL_ATERA,
+            },
+            labelCurrentProvider: {
+                type: 'string',
+                default: DEFAULT_LABEL_CURRENT,
             },
         },
         edit: (props) => {
@@ -267,8 +296,38 @@
                         },
                         wp.element.createElement(TextControl, {
                             label: __('Title', 'atera'),
-                            value: attributes.title,
+                            value: attributes.title || DEFAULT_TITLE,
                             onChange: (value) => setAttributes({ title: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Summary kicker', 'atera'),
+                            value: attributes.summaryKicker,
+                            onChange: (value) => setAttributes({ summaryKicker: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Summary CTA label', 'atera'),
+                            value: attributes.summaryCta || DEFAULT_CTA,
+                            onChange: (value) => setAttributes({ summaryCta: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Summary subtext', 'atera'),
+                            value: attributes.summarySubtext || DEFAULT_SUBTEXT,
+                            onChange: (value) => setAttributes({ summarySubtext: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Summary breakdown header', 'atera'),
+                            value: attributes.summaryBreakdownHeader || DEFAULT_BREAKDOWN_HEADER,
+                            onChange: (value) => setAttributes({ summaryBreakdownHeader: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Label: Atera', 'atera'),
+                            value: attributes.labelAtera || DEFAULT_LABEL_ATERA,
+                            onChange: (value) => setAttributes({ labelAtera: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Label: Current provider', 'atera'),
+                            value: attributes.labelCurrentProvider || DEFAULT_LABEL_CURRENT,
+                            onChange: (value) => setAttributes({ labelCurrentProvider: value }),
                         })
                     )
                 ),
@@ -281,13 +340,13 @@
                         wp.element.createElement(
                             'div',
                             { className: 'atera-compact-calculator__column atera-compact-calculator__column--intro' },
-                            wp.element.createElement(RichText, {
-                                tagName: 'h2',
-                                className: 'atera-compact-calculator__title',
-                                value: attributes.title,
-                                onChange: (value) => setAttributes({ title: value }),
-                                placeholder: __('Add block title…', 'atera'),
-                            })
+                                wp.element.createElement(RichText, {
+                                    tagName: 'h2',
+                                    className: 'atera-compact-calculator__title',
+                                    value: attributes.title || DEFAULT_TITLE,
+                                    onChange: (value) => setAttributes({ title: value }),
+                                    placeholder: __('Add block title…', 'atera'),
+                                })
                         ),
                         wp.element.createElement(
                             'div',
@@ -310,9 +369,14 @@
                                 'div',
                                 { className: 'atera-compact-calculator__summary-card' },
                                 wp.element.createElement(
-                                    'div',
-                                    { className: 'atera-compact-calculator__summary-kicker' },
-                                    __('You save', 'atera')
+                                    RichText,
+                                    {
+                                        tagName: 'div',
+                                        className: 'atera-compact-calculator__summary-kicker',
+                                        value: attributes.summaryKicker,
+                                        onChange: (value) => setAttributes({ summaryKicker: value }),
+                                        placeholder: __('You save', 'atera'),
+                                    }
                                 ),
                                 wp.element.createElement(
                                     'div',
@@ -323,28 +387,49 @@
                                         maximumFractionDigits: 0,
                                     }).format(figures.savings)
                                 ),
+                                wp.element.createElement(RichText, {
+                                    tagName: 'p',
+                                    className: 'atera-compact-calculator__summary-subtext',
+                                    value: attributes.summarySubtext || DEFAULT_SUBTEXT,
+                                    onChange: (value) => setAttributes({ summarySubtext: value }),
+                                    placeholder: DEFAULT_SUBTEXT,
+                                    allowedFormats: [],
+                                }),
                                 wp.element.createElement(
-                                    'p',
-                                    { className: 'atera-compact-calculator__summary-subtext' },
-                                    __('annually — estimated based on Atera’s Pro Plan', 'atera')
-                                ),
-                                wp.element.createElement(
-                                    'div',
-                                    { className: 'atera-compact-calculator__summary-cta' },
-                                    __('Start free trial', 'atera')
+                                    'a',
+                                    {
+                                        className: 'atera-compact-calculator__summary-cta',
+                                        href: '#start-trial',
+                                    },
+                                    wp.element.createElement(RichText, {
+                                        tagName: 'span',
+                                        value: attributes.summaryCta || DEFAULT_CTA,
+                                        onChange: (value) => setAttributes({ summaryCta: value }),
+                                        placeholder: __('Start free trial', 'atera'),
+                                        allowedFormats: [],
+                                    })
                                 ),
                                 wp.element.createElement(
                                     'div',
                                     { className: 'atera-compact-calculator__summary-breakdown' },
-                                    wp.element.createElement(
-                                        'div',
-                                        { className: 'atera-compact-calculator__summary-breakdown-header' },
-                                        __('Average annual cost', 'atera')
-                                    ),
+                                    wp.element.createElement(RichText, {
+                                        tagName: 'div',
+                                        className: 'atera-compact-calculator__summary-breakdown-header',
+                                        value: attributes.summaryBreakdownHeader || DEFAULT_BREAKDOWN_HEADER,
+                                        onChange: (value) => setAttributes({ summaryBreakdownHeader: value }),
+                                        placeholder: DEFAULT_BREAKDOWN_HEADER,
+                                        allowedFormats: [],
+                                    }),
                                     wp.element.createElement(
                                         'div',
                                         { className: 'atera-compact-calculator__summary-breakdown-row' },
-                                        wp.element.createElement('span', null, __('Atera', 'atera')),
+                                    wp.element.createElement(RichText, {
+                                        tagName: 'span',
+                                        value: attributes.labelAtera || DEFAULT_LABEL_ATERA,
+                                        onChange: (value) => setAttributes({ labelAtera: value }),
+                                        placeholder: DEFAULT_LABEL_ATERA,
+                                        allowedFormats: [],
+                                    }),
                                         wp.element.createElement(
                                             'span',
                                             null,
@@ -358,7 +443,13 @@
                                     wp.element.createElement(
                                         'div',
                                         { className: 'atera-compact-calculator__summary-breakdown-row' },
-                                        wp.element.createElement('span', null, __('Current provider', 'atera')),
+                                    wp.element.createElement(RichText, {
+                                        tagName: 'span',
+                                        value: attributes.labelCurrentProvider || DEFAULT_LABEL_CURRENT,
+                                        onChange: (value) => setAttributes({ labelCurrentProvider: value }),
+                                        placeholder: DEFAULT_LABEL_CURRENT,
+                                        allowedFormats: [],
+                                    }),
                                         wp.element.createElement(
                                             'span',
                                             null,
