@@ -13,7 +13,7 @@
                 <div class="atera-compact-calculator__summary-kicker"><?php echo esc_html( $summary_kicker ); ?></div>
                 <div class="atera-compact-calculator__summary-total" data-display-savings><?php echo esc_html( $currency_prefix . '0' ); ?></div>
                 <p class="atera-compact-calculator__summary-subtext"><?php echo esc_html( $summary_subtext ); ?></p>
-                <a href="#start-trial" class="atera-compact-calculator__summary-cta"><?php echo esc_html( $summary_cta ); ?></a>
+                <a href="<?php echo esc_url( $summary_cta_href ); ?>" class="atera-compact-calculator__summary-cta"><?php echo esc_html( $summary_cta ); ?></a>
                 <div class="atera-compact-calculator__summary-breakdown">
                     <div class="atera-compact-calculator__summary-breakdown-header"><?php echo esc_html( $summary_breakdown_header ); ?></div>
                     <div class="atera-compact-calculator__summary-breakdown-row">

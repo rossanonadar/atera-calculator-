@@ -68,6 +68,10 @@ function atera_compact_calculator_register_block() {
                     'type'    => 'string',
                     'default' => __( 'Start free trial', 'atera' ),
                 ),
+                'summaryCtaHref'         => array(
+                    'type'    => 'string',
+                    'default' => '',
+                ),
                 'summarySubtext'         => array(
                     'type'    => 'string',
                     'default' => __( 'annually — estimated based on Atera’s Pro Plan', 'atera' ),

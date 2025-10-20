@@ -7,10 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 // Load local and remote configuration files.
-// require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/config/local.php';
-// require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/config/remote.php';
-// require_once plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/config/asset.php';
-
 function atera_compact_calculator_merge_config( array $local, array $remote ) {
     $merged = $local;
     $local_sliders  = isset( $local['sliders'] ) && is_array( $local['sliders'] ) ? $local['sliders'] : array();
@@ -77,6 +73,10 @@ function atera_compact_calculator_merge_config( array $local, array $remote ) {
         $merged['prefix'] = '$';
     }
 
+    if ( isset( $remote['ctaHref'] ) && '' !== (string) $remote['ctaHref'] ) {
+        $merged['ctaHref'] = (string) $remote['ctaHref'];
+    }
+
     return $merged;
 }
 
@@ -128,4 +128,27 @@ function atera_compact_calculator_default_prefix() {
     }
 
     return '$';
+}
+
+function atera_compact_calculator_cta_href() {
+    $config = atera_compact_calculator_load_config();
+
+    if ( is_wp_error( $config ) ) {
+        return '#start-trial';
+    }
+
+    if ( isset( $config['ctaHref'] ) && '' !== (string) $config['ctaHref'] ) {
+        return (string) $config['ctaHref'];
+    }
+
+    $env = getenv( 'ATERA_CALC_CTA_HREF' );
+    if ( ! empty( $env ) ) {
+        return trim( $env );
+    }
+
+    if ( defined( 'ATERA_CALC_CTA_HREF' ) ) {
+        return (string) constant( 'ATERA_CALC_CTA_HREF' );
+    }
+
+    return '#start-trial';
 }

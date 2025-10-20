@@ -56,6 +56,10 @@
                 type: 'string',
                 default: DEFAULT_CTA,
             },
+            summaryCtaHref: {
+                type: 'string',
+                default: '',
+            },
             summarySubtext: {
                 type: 'string',
                 default: DEFAULT_SUBTEXT,
@@ -260,6 +264,12 @@
                             label: __('Summary CTA label', 'atera'),
                             value: attributes.summaryCta || DEFAULT_CTA,
                             onChange: (value) => setAttributes({ summaryCta: value }),
+                        }),
+                        wp.element.createElement(TextControl, {
+                            label: __('Summary CTA link', 'atera'),
+                            value: attributes.summaryCtaHref || '',
+                            onChange: (value) => setAttributes({ summaryCtaHref: value }),
+                            placeholder: '#start-trial',
                         }),
                         wp.element.createElement(TextControl, {
                             label: __('Summary subtext', 'atera'),

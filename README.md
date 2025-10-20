@@ -27,6 +27,7 @@ Atera Compact Calculator is a WordPress plugin that ships a single dynamic block
 ## Customisation
 - Update `calc-sliders.json` to change slider labels, ranges, defaults, or formatting. These act as built-in defaults and are used whenever the remote config cannot be reached.
 - Supply a remote configuration URL so the calculator stays synchronised with an external JSON file: go to **Settings → General → Calculator config URL** and enter the endpoint (e.g. `https://example.com/path/to/calc-sliders.json`). You can also provide it via the `ATERA_CALC_REMOTE_CONFIG_URL` environment variable/constant or the `atera_compact_calculator_remote_config_url` filter.
+- Control the CTA link per instance via the block sidebar (Summary CTA link). Leave it blank to fall back to the remote configuration or the `ATERA_CALC_CTA_HREF` env/constant and `atera_compact_calculator_cta_href` filter.
 - Styles can be adjusted in `assets/css/style.css` (frontend) and `assets/css/editor.css` (editor preview).
 - The summary CTA currently links to `#start-trial`. Replace or augment this in `includes/render.php` if a different target is required.
 

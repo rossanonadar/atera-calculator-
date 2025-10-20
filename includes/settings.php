@@ -45,6 +45,7 @@ function atera_compact_calculator_register_settings() {
         'atera_compact_calculator_remote_url_field',
         'general'
     );
+
 }
 add_action( 'admin_init', 'atera_compact_calculator_register_settings' );
 

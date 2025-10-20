@@ -23,6 +23,7 @@ function atera_compact_calculator_render_block( $attributes ) {
     $summary_cta = isset( $attributes['summaryCta'] ) && '' !== trim( $attributes['summaryCta'] )
         ? $attributes['summaryCta']
         : __( 'Start free trial', 'atera' );
+    $cta_href_attribute = isset( $attributes['summaryCtaHref'] ) ? trim( (string) $attributes['summaryCtaHref'] ) : '';
     $summary_subtext = isset( $attributes['summarySubtext'] ) && '' !== trim( $attributes['summarySubtext'] )
         ? $attributes['summarySubtext']
         : __( 'annually — estimated based on Atera’s Pro Plan', 'atera' );
@@ -45,6 +46,8 @@ function atera_compact_calculator_render_block( $attributes ) {
         $attributes
     );
     $config_endpoint = esc_url( rest_url( 'atera/v1/calculator-config' ) );
+    $cta_href_source = '' !== $cta_href_attribute ? $cta_href_attribute : atera_compact_calculator_cta_href();
+    $cta_href        = apply_filters( 'atera_compact_calculator_cta_href', $cta_href_source, $attributes );
 
     return atera_compact_calculator_render_template(
         'calculator.php',
@@ -54,6 +57,7 @@ function atera_compact_calculator_render_block( $attributes ) {
             'title'                    => $title,
             'summary_kicker'           => $summary_kicker,
             'summary_cta'              => $summary_cta,
+            'summary_cta_href'         => $cta_href,
             'summary_subtext'          => $summary_subtext,
             'summary_breakdown_header' => $summary_breakdown_header,
             'label_atera'              => $label_atera,
