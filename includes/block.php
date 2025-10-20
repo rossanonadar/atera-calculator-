@@ -58,7 +58,7 @@ function atera_compact_calculator_register_block() {
             'attributes'      => array(
                 'title'                  => array(
                     'type'    => 'string',
-                    'default' => __( 'Calculate how much you save with <br>Atera', 'atera' ),
+                    'default' => __( 'Calculate how much you save with Atera', 'atera' ),
                 ),
                 'summaryKicker'          => array(
                     'type'    => 'string',

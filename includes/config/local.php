@@ -40,3 +40,4 @@ function atera_compact_calculator_load_local_config() {
 
     return $data;
 }
+// End of file public/wp-content/plugins/atera/includes/config/local.php

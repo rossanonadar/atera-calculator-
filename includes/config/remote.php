@@ -23,7 +23,7 @@ function atera_compact_calculator_filter_remote_url( $url ) {
     }
 
     if ( defined( 'ATERA_CALC_REMOTE_CONFIG_URL' ) ) {
-        return trim( (string) ATERA_CALC_REMOTE_CONFIG_URL );
+        return trim( (string) constant( 'ATERA_CALC_REMOTE_CONFIG_URL' ) );
     }
 
     return $url;
