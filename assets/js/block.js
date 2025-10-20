@@ -13,6 +13,7 @@
     const ATERA_SEAT_RATE = 149;
 
     const DEFAULT_TITLE = __('Calculate how much you save with Atera', 'atera');
+    const DEFAULT_SAVE =__('You save', 'atera');
     const DEFAULT_CTA = __('Start free trial', 'atera');
     const DEFAULT_SUBTEXT = __('annually — estimated based on Atera’s Pro Plan', 'atera');
     const DEFAULT_BREAKDOWN_HEADER = __('Average annual cost', 'atera');
@@ -49,7 +50,7 @@
             },
             summaryKicker: {
                 type: 'string',
-                default: __('You save', 'atera'),
+                default: DEFAULT_SAVE
             },
             summaryCta: {
                 type: 'string',
@@ -331,7 +332,7 @@
                                         className: 'atera-compact-calculator__summary-kicker',
                                         value: attributes.summaryKicker,
                                         onChange: (value) => setAttributes({ summaryKicker: value }),
-                                        placeholder: __('You save', 'atera'),
+                                        placeholder: DEFAULT_SAVE,
                                     }
                                 ),
                                 wp.element.createElement(
