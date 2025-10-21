@@ -3,12 +3,15 @@
     const utils = {};
 
     // Convert a value to a number, with a fallback
+    // Returns the numeric value or the fallback if conversion fails
     utils.toNumber = (value, fallback) => {
         const numeric = Number(value);
         return Number.isFinite(numeric) ? numeric : fallback;
     };
 
     // Normalise a slider configuration object
+    // Ensures all necessary properties are present and correctly typed
+    // Returns null if the input is invalid
     utils.normaliseSlider = (slider) => {
         if (!slider || typeof slider !== 'object' || !slider.id) {
             return null;
@@ -32,6 +35,8 @@
     };
 
     // Format a mark value based on the slider's format settings
+    // Returns the formatted mark as a string
+    // Supports currency and number formatting
     utils.formatMarkValue = (slider, mark) => {
         if (typeof mark !== 'number') {
             return mark;
@@ -40,6 +45,7 @@
         const format = slider && slider.format ? slider.format : { type: 'number' };
 
         // Handle different formatting types
+        // Currency formatting
         if (format.type === 'currency') {
             try {
                 return new Intl.NumberFormat('en-US', {
@@ -61,6 +67,7 @@
     };
 
     // Calculate savings and annual costs
+    // Returns an object with savings, Atera annual cost, and current annual cost
     utils.calculateFigures = (values, seatRate) => {
         const technicians = utils.toNumber(values && values.technicians, 0);
         const endpoints = utils.toNumber(values && values.endpoints, 0);
@@ -79,6 +86,7 @@
     };
 
     // Generate a CSS gradient for a range input based on its value
+    // Returns the gradient string
     utils.getRangeGradient = (slider, rawValue) => {
         if (!slider) {
             return undefined;
@@ -96,6 +104,7 @@
     };
 
     // Apply the range gradient to an input element
+    // Sets the background style of the input
     utils.applyRangeGradient = (input, slider) => {
         if (!input || !slider) {
             return;
@@ -107,6 +116,7 @@
         }
     };
     // Format currency values with optional prefix and fraction digits
+    // Returns the formatted currency string
     utils.formatCurrency = (amount, options) => {
         const settings = options || {};
         const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
@@ -122,5 +132,6 @@
     };
 
     // Expose the utilities globally
+    // Allows access to the utility functions from other scripts
     global.ateraCompactCalculatorUtils = utils;
 })(window);

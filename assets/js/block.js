@@ -22,14 +22,17 @@
     const DEFAULT_NOTE_TEXT = __('', 'atera');
 
     // Utility function fallbacks
+    // Normalise slider configuration
     const normaliseSlider = utils.normaliseSlider || ((slider) => slider);
     const formatMarkValue = utils.formatMarkValue || ((slider, mark) => mark);
     const calculateFigures = (values) => (
         utils.calculateFigures ? utils.calculateFigures(values, ATERA_SEAT_RATE) : { savings: 0, ateraAnnual: 0, currentAnnual: 0 }
     );
     // Get range gradient utility
+    // Returns the CSS gradient string for a slider and value
     const getRangeGradient = utils.getRangeGradient || (() => undefined);
     // Currency formatting utility
+    // Returns formatted currency string
     const formatCurrency = utils.formatCurrency || ((amount, options) => {
         const settings = options || {};
         const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
@@ -38,6 +41,7 @@
     });
 
     // Register the block
+    // Defines the block's behavior and appearance in the editor
     registerBlockType('atera/compact-calculator', {
         apiVersion: 2,
         title: __('Atera Compact Calculator', 'atera'),
@@ -87,6 +91,7 @@
             },
         },
         // Block edit function
+        // Renders the block in the editor
         edit: (props) => {
             const { attributes, setAttributes } = props;
             const [config, setConfig] = useState(null);
@@ -96,6 +101,7 @@
             const [currencyPrefix, setCurrencyPrefix] = useState('$');
 
             // Fetch configuration on mount
+            // Loads slider settings from the REST API
             useEffect(() => {
                 let mounted = true;
 
@@ -105,6 +111,7 @@
                     return () => {};
                 }
                 // Fetch the calculator configuration
+                // from the REST endpoint
                 apiFetch({ path: '/atera/v1/calculator-config' })
                     .then((response) => {
                         if (!mounted) {
@@ -171,11 +178,13 @@
                 'data-currency-prefix': currencyPrefix,
             });
             // Render sliders based on configuration
+            // Generates slider elements with labels and marks
             const renderSliders = () => {
                 if (!config) {
                     return null;
                 }
                 // Create slider elements
+                // with labels, inputs, and marks
                 return config.sliders.map((slider) => {
                     const value = controls[slider.id] ?? slider.default;
 
