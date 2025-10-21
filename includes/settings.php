@@ -28,27 +28,6 @@ function atera_compact_calculator_remote_url_field() {
     echo '<p class="description">' . esc_html__( 'URL of the JSON configuration for the compact calculator. Leave empty to use the bundled defaults.', 'atera' ) . '</p>';
 }
 
-function atera_compact_calculator_register_settings() {
-    register_setting(
-        'general',
-        'atera_compact_calculator_remote_url',
-        array(
-            'type'              => 'string',
-            'sanitize_callback' => 'atera_compact_calculator_sanitize_remote_url',
-            'default'           => '',
-        )
-    );
-
-    add_settings_field(
-        'atera_compact_calculator_remote_url',
-        __( 'Calculator config URL', 'atera' ),
-        'atera_compact_calculator_remote_url_field',
-        'general'
-    );
-
-}
-add_action( 'admin_init', 'atera_compact_calculator_register_settings' );
-
 function atera_compact_calculator_flush_cached_config() {
     delete_transient( 'atera_compact_calculator_config_v1' );
 }
