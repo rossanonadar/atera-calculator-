@@ -6,10 +6,11 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
+// Load the local JSON configuration file for the calculator.
 function atera_compact_calculator_load_local_config() {
     $config_path = plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'calc-sliders.json';
 
+    // Check if the configuration file exists and is readable.
     if ( ! file_exists( $config_path ) ) {
         return new WP_Error(
             'atera_calculator_missing_config',
@@ -17,7 +18,7 @@ function atera_compact_calculator_load_local_config() {
             array( 'status' => 500 )
         );
     }
-
+    // Check if the configuration file is readable.
     if ( ! is_readable( $config_path ) ) {
         return new WP_Error(
             'atera_calculator_unreadable_config',
@@ -30,6 +31,7 @@ function atera_compact_calculator_load_local_config() {
         ? wp_json_file_decode( $config_path, array( 'associative' => true ) )
         : json_decode( file_get_contents( $config_path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
+    // Validate the decoded data.
     if ( null === $data || ! is_array( $data ) ) {
         return new WP_Error(
             'atera_calculator_invalid_config',
@@ -40,4 +42,3 @@ function atera_compact_calculator_load_local_config() {
 
     return $data;
 }
-// End of file public/wp-content/plugins/atera/includes/config/local.php

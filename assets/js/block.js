@@ -7,26 +7,29 @@
     const { useBlockProps, RichText, InspectorControls } = wp.blockEditor;
     const { PanelBody, TextControl, Notice, Spinner } = wp.components;
     const apiFetch = wp.apiFetch;
-
+    // Utility functions (assumed to be defined elsewhere)
     const utils = window.ateraCompactCalculatorUtils || {};
 
     const ATERA_SEAT_RATE = 149;
 
-    const DEFAULT_TITLE = __('Calculate how much you save with Atera', 'atera');
-    const DEFAULT_SAVE =__('You save', 'atera');
-    const DEFAULT_CTA = __('Start free trial', 'atera');
-    const DEFAULT_SUBTEXT = __('annually — estimated based on Atera’s Pro Plan', 'atera');
-    const DEFAULT_BREAKDOWN_HEADER = __('Average annual cost', 'atera');
-    const DEFAULT_LABEL_ATERA = __('Atera', 'atera');
-    const DEFAULT_LABEL_CURRENT = __('Current provider', 'atera');
-    const DEFAULT_NOTE_TEXT = __('Prices are shown in US Dollars', 'atera');
+    const DEFAULT_TITLE = __('', 'atera');
+    const DEFAULT_SAVE =__('', 'atera');
+    const DEFAULT_CTA = __('', 'atera');
+    const DEFAULT_SUBTEXT = __('', 'atera');
+    const DEFAULT_BREAKDOWN_HEADER = __('', 'atera');
+    const DEFAULT_LABEL_ATERA = __('', 'atera');
+    const DEFAULT_LABEL_CURRENT = __('', 'atera');
+    const DEFAULT_NOTE_TEXT = __('', 'atera');
 
+    // Utility function fallbacks
     const normaliseSlider = utils.normaliseSlider || ((slider) => slider);
     const formatMarkValue = utils.formatMarkValue || ((slider, mark) => mark);
     const calculateFigures = (values) => (
         utils.calculateFigures ? utils.calculateFigures(values, ATERA_SEAT_RATE) : { savings: 0, ateraAnnual: 0, currentAnnual: 0 }
     );
+    // Get range gradient utility
     const getRangeGradient = utils.getRangeGradient || (() => undefined);
+    // Currency formatting utility
     const formatCurrency = utils.formatCurrency || ((amount, options) => {
         const settings = options || {};
         const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
@@ -34,6 +37,7 @@
         return `${prefix}${numericAmount.toLocaleString('en-US', { maximumFractionDigits: settings.maximumFractionDigits || 0 })}`;
     });
 
+    // Register the block
     registerBlockType('atera/compact-calculator', {
         apiVersion: 2,
         title: __('Atera Compact Calculator', 'atera'),
@@ -43,6 +47,7 @@
         supports: {
             html: false,
         },
+        // Block attributes
         attributes: {
             title: {
                 type: 'string',
@@ -81,6 +86,7 @@
                 default: DEFAULT_NOTE_TEXT,
             },
         },
+        // Block edit function
         edit: (props) => {
             const { attributes, setAttributes } = props;
             const [config, setConfig] = useState(null);
@@ -89,6 +95,7 @@
             const [error, setError] = useState(null);
             const [currencyPrefix, setCurrencyPrefix] = useState('$');
 
+            // Fetch configuration on mount
             useEffect(() => {
                 let mounted = true;
 
@@ -97,7 +104,7 @@
                     setError(__('API utilities unavailable.', 'atera'));
                     return () => {};
                 }
-
+                // Fetch the calculator configuration
                 apiFetch({ path: '/atera/v1/calculator-config' })
                     .then((response) => {
                         if (!mounted) {
@@ -145,8 +152,10 @@
                 };
             }, []);
 
+            // Memoized calculation of figures
             const figures = useMemo(() => calculateFigures(controls), [controls]);
 
+            // Handle slider value changes
             const handleSliderChange = (id) => (event) => { // Handle both event and direct value
                 const value = event?.target?.value ?? event; // Direct value
                 setControls((prev) => ({ // Update specific control
@@ -155,17 +164,18 @@
                 }));
             };
 
+            // Block properties
             const blockProps = useBlockProps({
                 className: 'atera-compact-calculator',
                 'data-config-endpoint': '/atera/v1/calculator-config',
                 'data-currency-prefix': currencyPrefix,
             });
-
+            // Render sliders based on configuration
             const renderSliders = () => {
                 if (!config) {
                     return null;
                 }
-
+                // Create slider elements
                 return config.sliders.map((slider) => {
                     const value = controls[slider.id] ?? slider.default;
 
@@ -287,7 +297,7 @@
                             onChange: (value) => setAttributes({ labelAtera: value }),
                         }),
                         wp.element.createElement(TextControl, {
-                            label: __('Label: Current provider', 'atera'),
+                            label: __('Current provider', 'atera'),
                             value: attributes.labelCurrentProvider || DEFAULT_LABEL_CURRENT,
                             onChange: (value) => setAttributes({ labelCurrentProvider: value }),
                         }),
@@ -430,6 +440,7 @@
                 )
             );
         },
+        // Block save function (dynamic rendering)
         save: () => null,
     });
 })(window.wp); // End block scope

@@ -3,13 +3,15 @@
  * Block registration for the Atera Compact Calculator.
  */
 
+ // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
+// Register the block and its assets.
 function atera_compact_calculator_register_block() {
     $asset_url = plugins_url( 'assets/', ATERA_CALC_PLUGIN_FILE );
 
+    // Register scripts and styles.
     wp_register_script(
         'atera-compact-calculator-utils',
         $asset_url . 'js/utils.js',
@@ -17,7 +19,7 @@ function atera_compact_calculator_register_block() {
         atera_compact_calculator_asset_version( 'assets/js/utils.js' ),
         true
     );
-
+    // Register block script.
     wp_register_script(
         'atera-compact-calculator-block',
         $asset_url . 'js/block.js',
@@ -25,7 +27,7 @@ function atera_compact_calculator_register_block() {
         atera_compact_calculator_asset_version( 'assets/js/block.js' ),
         true
     );
-
+    // Register frontend script.
     wp_register_script(
         'atera-compact-calculator-frontend',
         $asset_url . 'js/frontend.js',
@@ -33,14 +35,14 @@ function atera_compact_calculator_register_block() {
         atera_compact_calculator_asset_version( 'assets/js/frontend.js' ),
         true
     );
-
+    // Register styles.
     wp_register_style(
         'atera-compact-calculator-style',
         $asset_url . 'css/style.css',
         array(),
         atera_compact_calculator_asset_version( 'assets/css/style.css' )
     );
-
+    // Register editor styles.
     wp_register_style(
         'atera-compact-calculator-editor-style',
         $asset_url . 'css/editor.css',
@@ -48,6 +50,7 @@ function atera_compact_calculator_register_block() {
         atera_compact_calculator_asset_version( 'assets/css/editor.css' )
     );
 
+    // Register the block type.
     register_block_type(
         'atera/compact-calculator',
         array(
@@ -97,4 +100,5 @@ function atera_compact_calculator_register_block() {
         )
     );
 }
+// Hook the block registration into the init action.
 add_action( 'init', 'atera_compact_calculator_register_block' );

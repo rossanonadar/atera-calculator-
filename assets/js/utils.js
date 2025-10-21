@@ -1,11 +1,14 @@
 (function (global) {
+    // Utility functions for the Atera Compact Calculator
     const utils = {};
 
+    // Convert a value to a number, with a fallback
     utils.toNumber = (value, fallback) => {
         const numeric = Number(value);
         return Number.isFinite(numeric) ? numeric : fallback;
     };
 
+    // Normalise a slider configuration object
     utils.normaliseSlider = (slider) => {
         if (!slider || typeof slider !== 'object' || !slider.id) {
             return null;
@@ -28,6 +31,7 @@
         };
     };
 
+    // Format a mark value based on the slider's format settings
     utils.formatMarkValue = (slider, mark) => {
         if (typeof mark !== 'number') {
             return mark;
@@ -35,6 +39,7 @@
 
         const format = slider && slider.format ? slider.format : { type: 'number' };
 
+        // Handle different formatting types
         if (format.type === 'currency') {
             try {
                 return new Intl.NumberFormat('en-US', {
@@ -43,17 +48,19 @@
                     maximumFractionDigits: format.maximumFractionDigits ?? 0,
                 }).format(mark);
             } catch (error) {
+                // Fallback if Intl.NumberFormat fails
                 return `$${mark.toLocaleString()}`;
             }
         }
-
+        // Default number formatting
         if (format.thousands) {
             return mark.toLocaleString();
         }
-
+        // Plain number
         return mark;
     };
 
+    // Calculate savings and annual costs
     utils.calculateFigures = (values, seatRate) => {
         const technicians = utils.toNumber(values && values.technicians, 0);
         const endpoints = utils.toNumber(values && values.endpoints, 0);
@@ -71,6 +78,7 @@
         };
     };
 
+    // Generate a CSS gradient for a range input based on its value
     utils.getRangeGradient = (slider, rawValue) => {
         if (!slider) {
             return undefined;
@@ -87,6 +95,7 @@
         return `linear-gradient(90deg, #f5c26b 0%, #e7a55b ${safeProgress}%, #e3dbd9 ${safeProgress}%, #e3dbd9 100%)`;
     };
 
+    // Apply the range gradient to an input element
     utils.applyRangeGradient = (input, slider) => {
         if (!input || !slider) {
             return;
@@ -97,7 +106,7 @@
             input.style.background = gradient;
         }
     };
-
+    // Format currency values with optional prefix and fraction digits
     utils.formatCurrency = (amount, options) => {
         const settings = options || {};
         const prefix = typeof settings.prefix === 'string' ? settings.prefix : '';
@@ -112,5 +121,6 @@
         })}`;
     };
 
+    // Expose the utilities globally
     global.ateraCompactCalculatorUtils = utils;
 })(window);

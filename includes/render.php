@@ -40,6 +40,7 @@ function atera_compact_calculator_render_block( $attributes ) {
         ? $attributes['noteText']
         : __( 'Prices are shown in US Dollars', 'atera' );
 
+    // Apply filters to allow customization of certain values.
     $currency_prefix = apply_filters(
         'atera_compact_calculator_currency_prefix',
         atera_compact_calculator_default_prefix(),
@@ -49,6 +50,7 @@ function atera_compact_calculator_render_block( $attributes ) {
     $cta_href_source = '' !== $cta_href_attribute ? $cta_href_attribute : atera_compact_calculator_cta_href();
     $cta_href        = apply_filters( 'atera_compact_calculator_cta_href', $cta_href_source, $attributes );
 
+    // Render the template with the provided context.
     return atera_compact_calculator_render_template(
         'calculator.php',
         array(
@@ -66,17 +68,19 @@ function atera_compact_calculator_render_block( $attributes ) {
         )
     );
 }
-
+// Helper function to render a template with context.
 function atera_compact_calculator_render_template( $template, array $context = array() ) {
     $template_path = plugin_dir_path( ATERA_CALC_PLUGIN_FILE ) . 'includes/templates/' . ltrim( $template, '/' );
 
+    // Check if the template file exists.
     if ( ! file_exists( $template_path ) ) {
         return '';
     }
-
+    // Start output buffering to capture the template output.
     ob_start();
     extract( $context, EXTR_SKIP );
     include $template_path;
 
+    // Get the buffered content and clean the buffer.
     return ob_get_clean();
 }

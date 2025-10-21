@@ -6,7 +6,7 @@
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
-
+// Register settings
 function atera_compact_calculator_sanitize_remote_url( $value ) {
     $value = trim( (string) $value );
 
@@ -16,7 +16,7 @@ function atera_compact_calculator_sanitize_remote_url( $value ) {
 
     return esc_url_raw( $value );
 }
-
+// Register the setting
 function atera_compact_calculator_remote_url_field() {
     $value = get_option( 'atera_compact_calculator_remote_url', '' );
 
@@ -27,7 +27,7 @@ function atera_compact_calculator_remote_url_field() {
 
     echo '<p class="description">' . esc_html__( 'URL of the JSON configuration for the compact calculator. Leave empty to use the bundled defaults.', 'atera' ) . '</p>';
 }
-
+// Add settings section and field
 function atera_compact_calculator_flush_cached_config() {
     delete_transient( 'atera_compact_calculator_config_v1' );
 }

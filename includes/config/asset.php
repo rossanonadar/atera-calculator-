@@ -3,6 +3,7 @@
  * Asset helper functions for Atera Compact Calculator.
  */
 
+// Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
